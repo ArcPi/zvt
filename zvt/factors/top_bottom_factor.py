@@ -39,13 +39,13 @@ class TopBottomFactor(TechnicalFactor):
                  level: Union[str, IntervalLevel] = IntervalLevel.LEVEL_1DAY, category_field: str = 'entity_id',
                  time_field: str = 'timestamp', computing_window: int = None, keep_all_timestamp: bool = False,
                  fill_method: str = 'ffill', effective_number: int = None,
-                 accumulator: Accumulator = None, persist_factor: bool = False, dry_run: bool = False,
+                 accumulator: Accumulator = None, need_persist: bool = False, dry_run: bool = False,
                  window=30) -> None:
         transformer = TopBottomTransformer(window=window)
         super().__init__(entity_schema, provider, entity_provider, entity_ids, exchanges, codes, the_timestamp,
                          start_timestamp, end_timestamp, columns, filters, order, limit, level, category_field,
                          time_field, computing_window, keep_all_timestamp, fill_method, effective_number, transformer,
-                         accumulator, persist_factor, dry_run)
+                         accumulator, need_persist, dry_run)
 
 
 if __name__ == '__main__':

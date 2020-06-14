@@ -252,6 +252,7 @@ def get_data(data_schema,
              level: Union[IntervalLevel, str] = None,
              provider: str = None,
              columns: List = None,
+             col_label: dict = None,
              return_type: str = 'df',
              start_timestamp: Union[pd.Timestamp, str] = None,
              end_timestamp: Union[pd.Timestamp, str] = None,
@@ -282,6 +283,15 @@ def get_data(data_schema,
         # make sure get timestamp
         if time_col not in columns:
             columns.append(time_col)
+
+        if col_label:
+            columns_ = []
+            for col in columns:
+                if col.name in col_label:
+                    columns_.append(col.label(col_label.get(col.name)))
+                else:
+                    columns_.append(col)
+            columns = columns_
 
         query = session.query(*columns)
     else:
@@ -451,6 +461,7 @@ def get_entities(
         code: str = None,
         provider: str = None,
         columns: List = None,
+        col_label: dict = None,
         return_type: str = 'df',
         start_timestamp: Union[pd.Timestamp, str] = None,
         end_timestamp: Union[pd.Timestamp, str] = None,
@@ -475,10 +486,9 @@ def get_entities(
             filters = [entity_schema.exchange.in_(exchanges)]
 
     return get_data(data_schema=entity_schema, ids=ids, entity_ids=entity_ids, entity_id=entity_id, codes=codes,
-                    code=code, level=None, provider=provider, columns=columns, return_type=return_type,
-                    start_timestamp=start_timestamp, end_timestamp=end_timestamp, filters=filters, session=session,
-                    order=order, limit=limit,
-                    index=index)
+                    code=code, level=None, provider=provider, columns=columns, col_label=col_label,
+                    return_type=return_type, start_timestamp=start_timestamp, end_timestamp=end_timestamp,
+                    filters=filters, session=session, order=order, limit=limit, index=index)
 
 
 def get_entity_ids(entity_type='stock', entity_schema: EntityMixin = None, exchanges=None, codes=None, provider=None):

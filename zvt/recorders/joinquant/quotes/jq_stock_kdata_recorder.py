@@ -4,16 +4,16 @@ import argparse
 import pandas as pd
 from jqdatasdk import auth, logout, get_bars
 
+from zvt import init_log, zvt_env
+from zvt.api import get_kdata
+from zvt.api.common import generate_kdata_id, get_kdata_schema
 from zvt.contract import IntervalLevel
 from zvt.contract.api import df_to_db
 from zvt.contract.recorder import FixedCycleDataRecorder
+from zvt.recorders.joinquant.common import to_jq_trading_level, to_jq_entity_id
+from zvt.schemas import Stock, StockKdataCommon
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_time_str, now_pd_timestamp, TIME_FORMAT_DAY, TIME_FORMAT_ISO8601
-from zvt import init_log, zvt_env
-from zvt.api.common import generate_kdata_id, get_kdata_schema
-from zvt.api import get_kdata
-from zvt.schemas import Stock, StockKdataCommon
-from zvt.recorders.joinquant.common import to_jq_trading_level, to_jq_entity_id
 
 
 class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
@@ -59,7 +59,7 @@ class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
     def generate_domain_id(self, entity, original_data):
         return generate_kdata_id(entity_id=entity.id, timestamp=original_data['timestamp'], level=self.level)
 
-    def on_finish_entity(self, entity):
+    def recompute_qfq(self, entity):
         # 重新计算前复权数据
         if self.factor != 0:
             kdatas = get_kdata(provider=self.provider, entity_id=entity.id, level=self.level.value,
@@ -99,7 +99,6 @@ class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
                           end_dt=end_timestamp,
                           fq_ref_date=to_time_str(now_pd_timestamp()),
                           include_now=False)
-
         if pd_is_not_null(df):
             df['name'] = entity.name
             df.rename(columns={'money': 'turnover', 'date': 'timestamp'}, inplace=True)
@@ -132,6 +131,8 @@ class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
             df['id'] = df[['entity_id', 'timestamp']].apply(generate_kdata_id, axis=1)
 
             df_to_db(df=df, data_schema=self.data_schema, provider=self.provider, force_update=self.force_update)
+
+            self.recompute_qfq(entity)
 
         return None
 

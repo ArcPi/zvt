@@ -90,7 +90,7 @@ class ZenFactor(TechnicalFactor):
                  provider: str = 'joinquant', level: Union[str, IntervalLevel] = IntervalLevel.LEVEL_1DAY,
                  category_field: str = 'entity_id', time_field: str = 'timestamp', computing_window: int = None,
                  keep_all_timestamp: bool = False, fill_method: str = 'ffill', effective_number: int = 10,
-                 persist_factor: bool = False, dry_run: bool = True) -> None:
+                 need_persist: bool = False, dry_run: bool = True) -> None:
         self.factor_schema = get_zen_factor_schema(entity_type=entity_type, level=level)
 
         transformer: Transformer = None
@@ -99,7 +99,7 @@ class ZenFactor(TechnicalFactor):
         super().__init__(entity_ids, entity_type, exchanges, codes, the_timestamp, start_timestamp,
                          end_timestamp, columns, filters, order, limit, provider, level, category_field, time_field,
                          computing_window, keep_all_timestamp, fill_method, effective_number, transformer, acc,
-                         persist_factor, dry_run)
+                         need_persist, dry_run)
 
 
 if __name__ == '__main__':

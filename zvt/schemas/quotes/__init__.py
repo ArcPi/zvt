@@ -59,6 +59,12 @@ class EtfKdataCommon(KdataCommon):
 
 
 class StockKdataCommon(KdataCommon):
+    # 后复权
+    hfq_open = Column(Float)
+    hfq_close = Column(Float)
+    hfq_high = Column(Float)
+    hfq_low = Column(Float)
+
     # 涨跌幅
     change_pct = Column(Float)
     # 换手率

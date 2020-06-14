@@ -51,7 +51,7 @@ def report_state():
             if long_stocks:
                 pre_date = target_date - datetime.timedelta(2 * 365)
                 ma_state = MaStateStatsFactor(entity_ids=long_stocks, start_timestamp=pre_date,
-                                              end_timestamp=target_date, persist_factor=False)
+                                              end_timestamp=target_date, need_persist=False)
 
                 ma_state.factor_df['slope'] = 100 * ma_state.factor_df['current_pct'] / ma_state.factor_df[
                     'current_count']

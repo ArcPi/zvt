@@ -184,6 +184,7 @@ class Mixin(object):
                    level: Union[IntervalLevel, str] = None,
                    provider: str = None,
                    columns: List = None,
+                   col_label: dict = None,
                    return_type: str = 'df',
                    start_timestamp: Union[pd.Timestamp, str] = None,
                    end_timestamp: Union[pd.Timestamp, str] = None,
@@ -197,9 +198,9 @@ class Mixin(object):
         if not provider:
             provider = cls.providers[provider_index]
         return get_data(data_schema=cls, ids=ids, entity_ids=entity_ids, entity_id=entity_id, codes=codes,
-                        code=code, level=level, provider=provider, columns=columns, return_type=return_type,
-                        start_timestamp=start_timestamp, end_timestamp=end_timestamp, filters=filters, session=session,
-                        order=order, limit=limit, index=index, time_field=time_field)
+                        code=code, level=level, provider=provider, columns=columns, col_label=col_label,
+                        return_type=return_type, start_timestamp=start_timestamp, end_timestamp=end_timestamp,
+                        filters=filters, session=session, order=order, limit=limit, index=index, time_field=time_field)
 
     @classmethod
     def record_data(cls,

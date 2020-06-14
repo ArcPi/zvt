@@ -26,7 +26,7 @@ class MaFactor(TechnicalFactor):
                  level: Union[str, IntervalLevel] = IntervalLevel.LEVEL_1DAY, category_field: str = 'entity_id',
                  time_field: str = 'timestamp', computing_window: int = None, keep_all_timestamp: bool = False,
                  fill_method: str = 'ffill', effective_number: int = None,
-                 accumulator: Accumulator = None, persist_factor: bool = False, dry_run: bool = False,
+                 accumulator: Accumulator = None, need_persist: bool = False, dry_run: bool = False,
                  windows=[5, 10, 34, 55, 89, 144, 120, 250]) -> None:
         self.factor_schema = get_ma_factor_schema(entity_type=entity_schema.__name__, level=level)
         self.windows = windows
@@ -36,7 +36,7 @@ class MaFactor(TechnicalFactor):
         super().__init__(entity_schema, provider, entity_provider, entity_ids, exchanges, codes, the_timestamp,
                          start_timestamp, end_timestamp, columns, filters, order, limit, level, category_field,
                          time_field, computing_window, keep_all_timestamp, fill_method, effective_number, transformer,
-                         accumulator, persist_factor, dry_run)
+                         accumulator, need_persist, dry_run)
 
 
 class CrossMaFactor(MaFactor):
@@ -63,7 +63,7 @@ class VolumeUpMa250Factor(TechnicalFactor):
                  level: Union[str, IntervalLevel] = IntervalLevel.LEVEL_1DAY, category_field: str = 'entity_id',
                  time_field: str = 'timestamp', computing_window: int = None, keep_all_timestamp: bool = False,
                  fill_method: str = 'ffill', effective_number: int = None,
-                 accumulator: Accumulator = None, persist_factor: bool = False, dry_run: bool = False,
+                 accumulator: Accumulator = None, need_persist: bool = False, dry_run: bool = False,
                  windows=[250], vol_windows=[30]) -> None:
         self.windows = windows
         self.vol_windows = vol_windows
@@ -73,7 +73,7 @@ class VolumeUpMa250Factor(TechnicalFactor):
         super().__init__(entity_schema, provider, entity_provider, entity_ids, exchanges, codes, the_timestamp,
                          start_timestamp, end_timestamp, columns, filters, order, limit, level, category_field,
                          time_field, computing_window, keep_all_timestamp, fill_method, effective_number, transformer,
-                         accumulator, persist_factor, dry_run)
+                         accumulator, need_persist, dry_run)
 
     def do_compute(self):
         super().do_compute()
@@ -105,7 +105,7 @@ class ImprovedMaFactor(TechnicalFactor):
                  level: Union[str, IntervalLevel] = IntervalLevel.LEVEL_1DAY, category_field: str = 'entity_id',
                  time_field: str = 'timestamp', computing_window: int = None, keep_all_timestamp: bool = False,
                  fill_method: str = 'ffill', effective_number: int = None,
-                 accumulator: Accumulator = None, persist_factor: bool = False, dry_run: bool = False,
+                 accumulator: Accumulator = None, need_persist: bool = False, dry_run: bool = False,
                  windows=[250], vol_windows=[10, 60]) -> None:
         self.windows = windows
         self.vol_windows = vol_windows
@@ -115,7 +115,7 @@ class ImprovedMaFactor(TechnicalFactor):
         super().__init__(entity_schema, provider, entity_provider, entity_ids, exchanges, codes, the_timestamp,
                          start_timestamp, end_timestamp, columns, filters, order, limit, level, category_field,
                          time_field, computing_window, keep_all_timestamp, fill_method, effective_number, transformer,
-                         accumulator, persist_factor, dry_run)
+                         accumulator, need_persist, dry_run)
 
     def do_compute(self):
         super().do_compute()

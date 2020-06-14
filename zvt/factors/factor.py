@@ -101,7 +101,7 @@ class Factor(DataReader, DataListener):
                  effective_number: int = None,
                  transformer: Transformer = None,
                  accumulator: Accumulator = None,
-                 persist_factor: bool = False,
+                 need_persist: bool = False,
                  dry_run: bool = False) -> None:
         """
 
@@ -111,7 +111,7 @@ class Factor(DataReader, DataListener):
         :param effective_number:
         :param transformer:
         :param accumulator:
-        :param persist_factor: whether persist factor
+        :param need_persist: whether persist factor
         :param dry_run: True for just computing factor, False for backtesting
         """
 
@@ -127,7 +127,7 @@ class Factor(DataReader, DataListener):
         self.transformer = transformer
         self.accumulator = accumulator
 
-        self.persist_factor = persist_factor
+        self.need_persist = need_persist
         self.dry_run = dry_run
 
         # 中间结果，不持久化
@@ -142,7 +142,7 @@ class Factor(DataReader, DataListener):
         # factor_df->result_df
         self.result_df: pd.DataFrame = None
 
-        if self.persist_factor:
+        if self.need_persist:
             if self.dry_run:
                 # 如果只是为了计算因子，只需要读取acc_window的factor_df
                 if self.accumulator is not None:
@@ -193,10 +193,11 @@ class Factor(DataReader, DataListener):
             self.factor_df = self.pipe_df
 
     def after_compute(self):
-        self.fill_gap()
+        if self.keep_all_timestamp:
+            self.fill_gap()
 
-        if self.persist_factor:
-            self.persist_result()
+        if self.need_persist:
+            self.persist_factor()
 
     def compute(self):
         self.pre_compute()
@@ -236,13 +237,12 @@ class Factor(DataReader, DataListener):
 
     def fill_gap(self):
         # 该操作较慢，只适合做基本面的运算
-        if self.keep_all_timestamp:
-            idx = pd.date_range(self.start_timestamp, self.end_timestamp)
-            new_index = pd.MultiIndex.from_product([self.result_df.index.levels[0], idx],
-                                                   names=['entity_id', self.time_field])
-            self.result_df = self.result_df.loc[~self.result_df.index.duplicated(keep='first')]
-            self.result_df = self.result_df.reindex(new_index)
-            self.result_df = self.result_df.fillna(method=self.fill_method, limit=self.effective_number)
+        idx = pd.date_range(self.start_timestamp, self.end_timestamp)
+        new_index = pd.MultiIndex.from_product([self.result_df.index.levels[0], idx],
+                                               names=['entity_id', self.time_field])
+        self.result_df = self.result_df.loc[~self.result_df.index.duplicated(keep='first')]
+        self.result_df = self.result_df.reindex(new_index)
+        self.result_df = self.result_df.fillna(method=self.fill_method, limit=self.effective_number)
 
     def on_data_loaded(self, data: pd.DataFrame):
         self.compute()
@@ -268,7 +268,7 @@ class Factor(DataReader, DataListener):
         """
         pass
 
-    def persist_result(self):
+    def persist_factor(self):
         df_to_db(df=self.factor_df, data_schema=self.factor_schema, provider='zvt', force_update=False)
 
 
@@ -287,13 +287,13 @@ class ScoreFactor(Factor):
                  level: Union[str, IntervalLevel] = IntervalLevel.LEVEL_1DAY, category_field: str = 'entity_id',
                  time_field: str = 'timestamp', computing_window: int = None, keep_all_timestamp: bool = False,
                  fill_method: str = 'ffill', effective_number: int = None, transformer: Transformer = None,
-                 accumulator: Accumulator = None, persist_factor: bool = False, dry_run: bool = False,
+                 accumulator: Accumulator = None, need_persist: bool = False, dry_run: bool = False,
                  scorer: Scorer = None) -> None:
         self.scorer = scorer
         super().__init__(data_schema, entity_schema, provider, entity_provider, entity_ids, exchanges, codes,
                          the_timestamp, start_timestamp, end_timestamp, columns, filters, order, limit, level,
                          category_field, time_field, computing_window, keep_all_timestamp, fill_method,
-                         effective_number, transformer, accumulator, persist_factor, dry_run)
+                         effective_number, transformer, accumulator, need_persist, dry_run)
 
     def do_compute(self):
         super().do_compute()
