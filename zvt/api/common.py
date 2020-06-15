@@ -14,13 +14,17 @@ from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp, to_time_str,
 
 
 def get_kdata_schema(entity_type: str,
-                     level: Union[IntervalLevel, str] = IntervalLevel.LEVEL_1DAY):
+                     level: Union[IntervalLevel, str] = IntervalLevel.LEVEL_1DAY,
+                     fq: str = None):
     if type(level) == str:
         level = IntervalLevel(level)
 
     # kdata schema rule
     # 1)name:{SecurityType.value.capitalize()}{IntervalLevel.value.upper()}Kdata
-    schema_str = '{}{}Kdata'.format(entity_type.capitalize(), level.value.capitalize())
+    if fq:
+        schema_str = '{}{}Kdata'.format(entity_type.capitalize(), level.value.capitalize(), fq.capitalize())
+    else:
+        schema_str = '{}{}Kdata'.format(entity_type.capitalize(), level.value.capitalize())
 
     return eval(schema_str)
 

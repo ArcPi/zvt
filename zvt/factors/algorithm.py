@@ -9,6 +9,7 @@ from zvt.factors.factor import Scorer, Transformer
 
 class MaTransformer(Transformer):
     def __init__(self, windows=[5, 10], cal_change_pct=False) -> None:
+        super().__init__()
         self.windows = windows
         self.cal_change_pct = cal_change_pct
 
@@ -54,6 +55,7 @@ class MaAndVolumeTransformer(Transformer):
 
 class MacdTransformer(Transformer):
     def __init__(self, slow=26, fast=12, n=9) -> None:
+        super().__init__()
         self.slow = slow
         self.fast = fast
         self.n = n
