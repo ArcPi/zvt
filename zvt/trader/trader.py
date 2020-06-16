@@ -5,19 +5,19 @@ from typing import List, Union
 
 import pandas as pd
 
+from zvt.api.business import get_trader
+from zvt.api.quote import get_one_day_trading_minutes
+from zvt.api.rules import iterate_timestamps, is_open_time, is_in_finished_timestamps, is_close_time
 from zvt.contract import IntervalLevel, EntityMixin
 from zvt.contract.api import get_db_session
 from zvt.contract.normal_data import NormalData
-from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp
-from zvt.api.business import get_trader
-from zvt.api.quote import get_one_day_trading_minutes
-from zvt.api.rules import iterate_timestamps, is_open_time, is_in_finished_timestamps, is_close_time, is_trading_date
-from zvt.schemas import business, Stock
 from zvt.drawer.drawer import Drawer
 from zvt.factors.target_selector import TargetSelector
 from zvt.reader.business_reader import AccountReader
+from zvt.schemas import business, Stock
 from zvt.trader import TradingSignal, TradingSignalType
 from zvt.trader.account import SimAccountService
+from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp, to_time_str
 
 logger = logging.getLogger(__name__)
 
@@ -113,6 +113,8 @@ class Trader(object):
                  draw_result: bool = True) -> None:
 
         assert self.entity_schema is not None
+
+        self.trading_dates = self.entity_schema.get_trading_dates(start_date=start_timestamp, end_date=end_timestamp)
 
         if trader_name:
             self.trader_name = trader_name
@@ -312,6 +314,9 @@ class Trader(object):
                                                  category_field='trader_name'))
             drawer.draw_line()
 
+    def in_trading_date(self, timestamp):
+        return to_time_str(timestamp) in self.trading_dates
+
     def run(self):
         # iterate timestamp of the min level,e.g,9:30,9:35,9.40...for 5min level
         # timestamp represents the timestamp in kdata
@@ -319,7 +324,7 @@ class Trader(object):
                                             start_timestamp=self.start_timestamp, end_timestamp=self.end_timestamp,
                                             level=self.level):
 
-            if not is_trading_date(entity_type=self.entity_schema, exchange=self.exchanges[0], timestamp=timestamp):
+            if not self.in_trading_date(timestamp=timestamp):
                 continue
             if self.real_time:
                 # all selector move on to handle the coming data
@@ -354,8 +359,9 @@ class Trader(object):
             for level in self.trading_level_asc:
                 # in every cycle, all level selector do its job in its time
                 if (
-                is_in_finished_timestamps(entity_type=self.entity_schema.__name__.lower(), exchange=self.exchanges[0],
-                                          timestamp=timestamp, level=level)):
+                        is_in_finished_timestamps(entity_type=self.entity_schema.__name__.lower(),
+                                                  exchange=self.exchanges[0],
+                                                  timestamp=timestamp, level=level)):
                     long_targets, short_targets = self.selectors_comparator.make_decision(timestamp=timestamp,
                                                                                           trading_level=level)
 

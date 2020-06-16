@@ -279,6 +279,10 @@ class EntityMixin(Mixin):
     code = Column(String(length=64))
     name = Column(String(length=128))
 
+    @classmethod
+    def get_trading_dates(cls, start_date, end_date):
+        return pd.date_range(start_date, end_date, freq='B')
+
 
 class NormalEntityMixin(EntityMixin):
     # the record created time in db
