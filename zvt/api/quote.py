@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from sqlalchemy import exists, and_
 
+from zvt.api import AdjustType
 from zvt.contract import IntervalLevel
 from zvt.contract.api import decode_entity_id
 from zvt.schemas import *
@@ -15,14 +16,15 @@ from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp, to_time_str,
 
 def get_kdata_schema(entity_type: str,
                      level: Union[IntervalLevel, str] = IntervalLevel.LEVEL_1DAY,
-                     fq: str = None):
+                     adjust_type: AdjustType = None):
     if type(level) == str:
         level = IntervalLevel(level)
 
     # kdata schema rule
     # 1)name:{SecurityType.value.capitalize()}{IntervalLevel.value.upper()}Kdata
-    if fq:
-        schema_str = '{}{}Kdata'.format(entity_type.capitalize(), level.value.capitalize(), fq.capitalize())
+    if adjust_type and (adjust_type != AdjustType.qfq):
+        schema_str = '{}{}{}Kdata'.format(entity_type.capitalize(), level.value.capitalize(),
+                                          adjust_type.value.capitalize())
     else:
         schema_str = '{}{}Kdata'.format(entity_type.capitalize(), level.value.capitalize())
 
@@ -276,9 +278,9 @@ def get_etf_stocks(code=None, codes=None, ids=None, timestamp=now_pd_timestamp()
 
 def get_kdata(entity_id=None, level=IntervalLevel.LEVEL_1DAY.value, provider='joinquant', columns=None,
               return_type='df', start_timestamp=None, end_timestamp=None,
-              filters=None, session=None, order=None, limit=None, index='timestamp'):
+              filters=None, session=None, order=None, limit=None, index='timestamp', adjust_type: AdjustType = None):
     entity_type, exchange, code = decode_entity_id(entity_id)
-    data_schema: Mixin = get_kdata_schema(entity_type, level=level)
+    data_schema: Mixin = get_kdata_schema(entity_type, level=level, adjust_type=adjust_type)
 
     return data_schema.query_data(entity_id=entity_id, level=level, provider=provider,
                                   columns=columns, return_type=return_type, start_timestamp=start_timestamp,

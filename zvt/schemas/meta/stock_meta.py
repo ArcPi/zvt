@@ -69,7 +69,7 @@ class Etf(StockMetaBase, BasePortfolio):
 
     @classmethod
     def get_stocks(cls, code=None, codes=None, ids=None, timestamp=now_pd_timestamp(), provider=None):
-        from zvt.api.common import get_etf_stocks
+        from zvt.api.quote import get_etf_stocks
         return get_etf_stocks(code=code, codes=codes, ids=ids, timestamp=timestamp, provider=provider)
 
 

@@ -6,7 +6,7 @@ from zvt.contract.api import df_to_db, get_entity_exchange, get_entity_code
 from zvt.contract.recorder import Recorder, TimeSeriesDataRecorder
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt import zvt_env
-from zvt.api.common import china_stock_code_to_id, portfolio_relate_stock
+from zvt.api.quote import china_stock_code_to_id, portfolio_relate_stock
 from zvt.schemas import EtfStock, Stock, Etf, StockDetail
 from zvt.recorders.joinquant.common import to_entity_id, jq_to_report_period
 

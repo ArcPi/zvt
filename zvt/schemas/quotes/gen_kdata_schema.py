@@ -2,6 +2,7 @@
 import os
 from typing import List
 
+from zvt.api import AdjustType
 from zvt.contract import IntervalLevel
 
 
@@ -9,10 +10,11 @@ from zvt.contract import IntervalLevel
 # 1)name:{entity_type}{level}Kdata
 # 2)one db file for one schema
 
-def gen_kdata_schema(pkg: str, providers: List[str], entity_type: str, levels, fqs: List[str] = [None]):
+def gen_kdata_schema(pkg: str, providers: List[str], entity_type: str, levels: List[IntervalLevel],
+                     adjust_types: List[AdjustType] = [None]):
     tables = []
     for level in levels:
-        for fq in fqs:
+        for adjust_type in adjust_types:
             level = IntervalLevel(level)
 
             cap_entity_type = entity_type.capitalize()
@@ -23,15 +25,14 @@ def gen_kdata_schema(pkg: str, providers: List[str], entity_type: str, levels, f
             else:
                 kdata_common = f'{cap_entity_type}TickCommon'
 
-            if fq:
-                class_name = f'{cap_entity_type}{cap_level}{fq.capitalize()}Kdata'
+            if adjust_type and (adjust_type != AdjustType.qfq):
+                class_name = f'{cap_entity_type}{cap_level}{adjust_type.value.capitalize()}Kdata'
+                table_name = f'{entity_type}_{level.value}_{adjust_type.value.lower()}_kdata'
+
             else:
                 class_name = f'{cap_entity_type}{cap_level}Kdata'
-
-            if fq:
-                table_name = f'{entity_type}_{level.value}_{fq.lower()}_kdata'
-            else:
                 table_name = f'{entity_type}_{level.value}_kdata'
+
             tables.append(table_name)
 
             schema_template = f'''# -*- coding: utf-8 -*-
@@ -71,7 +72,8 @@ __all__ = ['{class_name}']
 if __name__ == '__main__':
     # 股票行情
     gen_kdata_schema(pkg='zvt', providers=['joinquant'], entity_type='stock',
-                     levels=[level for level in IntervalLevel if level != IntervalLevel.LEVEL_TICK], fqs=[None, 'hfq'])
+                     levels=[level for level in IntervalLevel if level != IntervalLevel.LEVEL_TICK],
+                     adjust_types=[None, AdjustType.hfq])
 
     # 板块行情
     gen_kdata_schema(pkg='zvt', providers=['eastmoney'], entity_type='block',

@@ -5,7 +5,7 @@ from typing import List, Union
 import pandas as pd
 
 from zvt.api import Stock
-from zvt.api.common import get_ma_state_stats_schema
+from zvt.api.quote import get_ma_state_stats_schema
 from zvt.contract import IntervalLevel, EntityMixin
 from zvt.contract.api import get_entities
 from zvt.factors.algorithm import MaTransformer

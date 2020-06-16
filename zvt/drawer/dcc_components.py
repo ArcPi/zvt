@@ -3,7 +3,7 @@
 import plotly.graph_objs as go
 import simplejson
 
-from zvt.api.common import decode_entity_id
+from zvt.api.quote import decode_entity_id
 from zvt.api import get_current_price
 from zvt.schemas import business
 from zvt.factors.technical_factor import TechnicalFactor

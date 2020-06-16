@@ -5,7 +5,7 @@ import math
 
 from zvt.api import get_kdata
 from zvt.api.business import get_account
-from zvt.api.common import decode_entity_id, get_kdata_schema
+from zvt.api.quote import decode_entity_id, get_kdata_schema
 from zvt.api.rules import get_trading_meta
 from zvt.contract import IntervalLevel
 from zvt.contract.api import get_db_session

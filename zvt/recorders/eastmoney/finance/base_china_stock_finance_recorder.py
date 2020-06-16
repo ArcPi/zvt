@@ -3,7 +3,7 @@ import pandas as pd
 from jqdatasdk import auth, query, indicator, get_fundamentals, logout
 
 from zvt import zvt_env
-from zvt.api.common import to_jq_report_period
+from zvt.api.quote import to_jq_report_period
 from zvt.contract.api import get_data
 from zvt.schemas import FinanceFactor
 from zvt.recorders.eastmoney.common import company_type_flag, get_fc, EastmoneyTimestampsDataRecorder, \
