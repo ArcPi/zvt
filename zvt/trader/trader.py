@@ -95,13 +95,11 @@ class TargetsSlot(object):
 
 
 class Trader(object):
-    logger = logging.getLogger(__name__)
-
     entity_schema: EntityMixin = None
 
     def __init__(self,
                  entity_ids: List[str] = None,
-                 exchanges: List[str] = ['sh', 'sz'],
+                 exchanges: List[str] = None,
                  codes: List[str] = None,
                  start_timestamp: Union[str, pd.Timestamp] = None,
                  end_timestamp: Union[str, pd.Timestamp] = None,
@@ -111,10 +109,9 @@ class Trader(object):
                  real_time: bool = False,
                  kdata_use_begin_time: bool = False,
                  draw_result: bool = True) -> None:
-
         assert self.entity_schema is not None
 
-        self.trading_dates = self.entity_schema.get_trading_dates(start_date=start_timestamp, end_date=end_timestamp)
+        self.logger = logging.getLogger(__name__)
 
         if trader_name:
             self.trader_name = trader_name
@@ -140,6 +137,9 @@ class Trader(object):
             self.end_timestamp = to_pd_timestamp(end_timestamp)
         else:
             assert False
+
+        self.trading_dates = self.entity_schema.get_trading_dates(start_date=self.start_timestamp,
+                                                                  end_date=self.end_timestamp)
 
         if real_time:
             logger.info(
