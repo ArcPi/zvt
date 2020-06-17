@@ -36,6 +36,15 @@ def test_1d_kdata_recorder():
         assert False
 
 
+def test_1d_hfq_kdata_recorder():
+    recorder = JqChinaStockKdataRecorder(codes=['000338'], sleeping_time=0, level=IntervalLevel.LEVEL_1DAY,
+                                         real_time=False, adjust_type='hfq')
+    try:
+        recorder.run()
+    except:
+        assert False
+
+
 def test_1h_kdata_recorder():
     recorder = JqChinaStockKdataRecorder(codes=['000338'], sleeping_time=0, level=IntervalLevel.LEVEL_1HOUR,
                                          real_time=False, start_timestamp='2019-01-01')

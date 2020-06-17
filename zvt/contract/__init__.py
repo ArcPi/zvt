@@ -218,7 +218,8 @@ class Mixin(object):
                     start_timestamp=None,
                     end_timestamp=None,
                     close_hour=None,
-                    close_minute=None):
+                    close_minute=None,
+                    one_day_trading_minutes=None):
         if cls.provider_map_recorder:
             print(f'{cls.__name__} registered recorders:{cls.provider_map_recorder}')
 
@@ -247,15 +248,21 @@ class Mixin(object):
             if issubclass(recorder_class, FixedCycleDataRecorder):
                 # contract:
                 # 1)use FixedCycleDataRecorder to record the data with IntervalLevel
-                # 2)the table of schema with IntervalLevel format is {entity}_{level}_{event}
+                # 2)the table of schema with IntervalLevel format is {entity}_{level}_[adjust_type]_{event}
                 table: str = cls.__tablename__
                 try:
-                    level = IntervalLevel(table.split('_')[1])
+                    items = table.split('_')
+                    if len(items) == 4:
+                        adjust_type = items[2]
+                        kw['adjust_type'] = adjust_type
+                    level = IntervalLevel(items[1])
                 except:
                     # for other schema not with normal format,but need to calculate size for remaining days
                     level = IntervalLevel.LEVEL_1DAY
 
-                r = recorder_class(level=level, **kw)
+                kw['level'] = level
+
+                r = recorder_class(**kw)
                 r.run()
                 return
             else:

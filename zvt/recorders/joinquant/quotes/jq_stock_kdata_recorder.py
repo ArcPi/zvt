@@ -45,6 +45,7 @@ class JqChinaStockKdataRecorder(FixedCycleDataRecorder):
                  one_day_trading_minutes=4 * 60,
                  adjust_type=AdjustType.qfq) -> None:
         level = IntervalLevel(level)
+        adjust_type = AdjustType(adjust_type)
         self.data_schema = get_kdata_schema(entity_type='stock', level=level, adjust_type=adjust_type)
         self.jq_trading_level = to_jq_trading_level(level)
 

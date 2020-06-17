@@ -99,7 +99,7 @@ class Trader(object):
 
     def __init__(self,
                  entity_ids: List[str] = None,
-                 exchanges: List[str] = None,
+                 exchanges: List[str] = ['sh', 'sz'],
                  codes: List[str] = None,
                  start_timestamp: Union[str, pd.Timestamp] = None,
                  end_timestamp: Union[str, pd.Timestamp] = None,
