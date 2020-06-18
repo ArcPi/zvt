@@ -6,7 +6,6 @@ from typing import List, Union
 import pandas as pd
 
 from zvt.api.business import get_trader
-from zvt.api.quote import get_one_day_trading_minutes
 from zvt.api.rules import iterate_timestamps, is_open_time, is_in_finished_timestamps, is_close_time
 from zvt.contract import IntervalLevel, EntityMixin
 from zvt.contract.api import get_db_session
@@ -333,11 +332,10 @@ class Trader(object):
                 else:
                     real_end_timestamp = timestamp
 
-                waiting_seconds, _ = self.level.count_from_timestamp(real_end_timestamp,
-                                                                     one_day_trading_minutes=get_one_day_trading_minutes(
-                                                                         entity_type=self.entity_schema))
+                seconds = (now_pd_timestamp() - real_end_timestamp).total_seconds()
+                waiting_seconds = self.level.to_second() - seconds,
                 # meaning the future kdata not ready yet,we could move on to check
-                if waiting_seconds and (waiting_seconds > 0):
+                if waiting_seconds > 0:
                     # iterate the selector from min to max which in finished timestamp kdata
                     for level in self.trading_level_asc:
                         if (is_in_finished_timestamps(entity_type=self.entity_schema, exchange=self.exchanges[0],

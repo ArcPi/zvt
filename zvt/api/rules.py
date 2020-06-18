@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+from typing import List
 
 import pandas as pd
 
@@ -9,6 +10,7 @@ from zvt.utils.time_utils import to_pd_timestamp, date_and_time, is_same_time, t
     now_pd_timestamp, is_same_date
 
 logger = logging.getLogger(__name__)
+
 
 # make sure the timestamp is in trading date at first
 # this function is used to handle unfinished kdata
@@ -39,7 +41,7 @@ def generate_finished_timestamps(entity_type, exchange, level):
 
 def iterate_timestamps(entity_type, exchange, start_timestamp: pd.Timestamp, end_timestamp: pd.Timestamp,
                        level=IntervalLevel.LEVEL_1DAY, contain_all_timestamp=True,
-                       kdata_use_begin_time=False) -> pd.Timestamp:
+                       kdata_use_begin_time=False) -> List[pd.Timestamp]:
     """
 
     :param entity_type:

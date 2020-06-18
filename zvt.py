@@ -4,6 +4,7 @@ import pluggy
 
 from zvt import impls, zvt_env, specs
 from zvt.contract import zvt_context
+from zvt.schemas import Stock1dHfqKdata
 
 
 def main():
@@ -41,4 +42,5 @@ class ZvtRunner:
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    Stock1dHfqKdata.record_data(codes=['000338'])
