@@ -197,21 +197,23 @@ class EntityMixin(Mixin):
         :param end_date:
         :param level:
         """
-        assert level <= IntervalLevel.LEVEL_1DAY
 
         for current_date in cls.get_trading_dates(start_date=start_date, end_date=end_date):
-            start_end_list = cls.get_trading_intervals()
+            if level >= IntervalLevel.LEVEL_1DAY:
+                yield current_date
+            else:
+                start_end_list = cls.get_trading_intervals()
 
-            for start_end in start_end_list:
-                start = start_end[0]
-                end = start_end[1]
+                for start_end in start_end_list:
+                    start = start_end[0]
+                    end = start_end[1]
 
-                current_timestamp = date_and_time(the_date=current_date, the_time=start)
-                end_timestamp = date_and_time(the_date=current_date, the_time=end)
+                    current_timestamp = date_and_time(the_date=current_date, the_time=start)
+                    end_timestamp = date_and_time(the_date=current_date, the_time=end)
 
-                while current_timestamp <= end_timestamp:
-                    yield current_timestamp
-                    current_timestamp = current_timestamp + timedelta(minutes=level.to_minute())
+                    while current_timestamp <= end_timestamp:
+                        yield current_timestamp
+                        current_timestamp = current_timestamp + timedelta(minutes=level.to_minute())
 
     @classmethod
     def is_open_timestamp(cls, timestamp):
@@ -242,6 +244,25 @@ class EntityMixin(Mixin):
                 return True
 
         return False
+
+    @classmethod
+    def could_short(cls):
+        """
+        whether could be shorted
+
+        :return:
+        """
+        return False
+
+    @classmethod
+    def get_trading_t(cls):
+        """
+        0 means t+0
+        1 means t+1
+
+        :return:
+        """
+        return 1
 
 
 class NormalEntityMixin(EntityMixin):

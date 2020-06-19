@@ -6,8 +6,7 @@ import math
 from zvt.api import get_kdata
 from zvt.api.business import get_account
 from zvt.api.quote import decode_entity_id, get_kdata_schema
-from zvt.api.rules import get_trading_meta
-from zvt.contract import IntervalLevel
+from zvt.contract import IntervalLevel, EntityMixin
 from zvt.contract.api import get_db_session
 from zvt.schemas import Order
 from zvt.schemas.business import SimAccount, Position
@@ -122,7 +121,9 @@ class AccountService(TradingListener):
 
 class SimAccountService(AccountService):
 
-    def __init__(self, trader_name,
+    def __init__(self,
+                 entity_schema: EntityMixin,
+                 trader_name,
                  timestamp,
                  provider='joinquant',
                  level=IntervalLevel.LEVEL_1DAY,
@@ -130,7 +131,7 @@ class SimAccountService(AccountService):
                  buy_cost=0.001,
                  sell_cost=0.001,
                  slippage=0.001):
-
+        self.entity_schema = entity_schema
         self.base_capital = base_capital
         self.buy_cost = buy_cost
         self.sell_cost = sell_cost
@@ -388,7 +389,7 @@ class SimAccountService(AccountService):
             current_position = self.get_current_position(entity_id=entity_id)
 
             if not current_position:
-                trading_t = get_trading_meta(entity_id=entity_id)['trading_t']
+                trading_t = self.entity_schema.get_trading_t()
                 current_position = {
                     'trader_name': self.trader_name,
                     'entity_id': entity_id,

@@ -6,7 +6,6 @@ from typing import List, Union
 import pandas as pd
 
 from zvt.api.business import get_trader
-from zvt.api.rules import iterate_timestamps, is_open_time, is_in_finished_timestamps, is_close_time
 from zvt.contract import IntervalLevel, EntityMixin
 from zvt.contract.api import get_db_session
 from zvt.contract.normal_data import NormalData
@@ -148,7 +147,8 @@ class Trader(object):
         self.kdata_use_begin_time = kdata_use_begin_time
         self.draw_result = draw_result
 
-        self.account_service = SimAccountService(trader_name=self.trader_name,
+        self.account_service = SimAccountService(entity_schema=self.entity_schema,
+                                                 trader_name=self.trader_name,
                                                  timestamp=self.start_timestamp,
                                                  provider=self.provider,
                                                  level=self.level)
@@ -319,9 +319,8 @@ class Trader(object):
     def run(self):
         # iterate timestamp of the min level,e.g,9:30,9:35,9.40...for 5min level
         # timestamp represents the timestamp in kdata
-        for timestamp in iterate_timestamps(entity_type=self.entity_schema, exchange=self.exchanges[0],
-                                            start_timestamp=self.start_timestamp, end_timestamp=self.end_timestamp,
-                                            level=self.level):
+        for timestamp in self.entity_schema.get_interval_timestamps(start_date=self.start_timestamp,
+                                                                    end_date=self.end_timestamp, level=self.level):
 
             if not self.in_trading_date(timestamp=timestamp):
                 continue
@@ -338,17 +337,14 @@ class Trader(object):
                 if waiting_seconds > 0:
                     # iterate the selector from min to max which in finished timestamp kdata
                     for level in self.trading_level_asc:
-                        if (is_in_finished_timestamps(entity_type=self.entity_schema, exchange=self.exchanges[0],
-                                                      timestamp=timestamp, level=level)):
+                        if self.entity_schema.is_finished_kdata_timestamp(timestamp=timestamp, level=level):
                             for selector in self.selectors:
                                 if selector.level == level:
                                     selector.move_on(timestamp, self.kdata_use_begin_time, timeout=waiting_seconds + 20)
 
             # on_trading_open to setup the account
             if self.level == IntervalLevel.LEVEL_1DAY or (
-                    self.level != IntervalLevel.LEVEL_1DAY and is_open_time(entity_type=self.entity_schema,
-                                                                            exchange=self.exchanges[0],
-                                                                            timestamp=timestamp)):
+                    self.level != IntervalLevel.LEVEL_1DAY and self.entity_schema.is_open_timestamp(timestamp)):
                 self.account_service.on_trading_open(timestamp)
 
             # the time always move on by min level step and we could check all level targets in the slot
@@ -356,10 +352,7 @@ class Trader(object):
 
             for level in self.trading_level_asc:
                 # in every cycle, all level selector do its job in its time
-                if (
-                        is_in_finished_timestamps(entity_type=self.entity_schema.__name__.lower(),
-                                                  exchange=self.exchanges[0],
-                                                  timestamp=timestamp, level=level)):
+                if self.entity_schema.is_finished_kdata_timestamp(timestamp=timestamp, level=level):
                     long_targets, short_targets = self.selectors_comparator.make_decision(timestamp=timestamp,
                                                                                           trading_level=level)
 
@@ -367,9 +360,7 @@ class Trader(object):
 
             # on_trading_close to calculate date account
             if self.level == IntervalLevel.LEVEL_1DAY or (
-                    self.level != IntervalLevel.LEVEL_1DAY and is_close_time(entity_type=self.entity_schema,
-                                                                             exchange=self.exchanges[0],
-                                                                             timestamp=timestamp)):
+                    self.level != IntervalLevel.LEVEL_1DAY and self.entity_schema.is_close_timestamp(timestamp)):
                 self.account_service.on_trading_close(timestamp)
 
         self.on_finish()

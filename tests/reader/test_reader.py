@@ -5,7 +5,6 @@ init_test_context()
 
 import time
 
-from zvt.api.rules import iterate_timestamps
 from zvt.schemas import Stock1dKdata, Stock
 
 from zvt.utils.time_utils import to_time_str
@@ -31,10 +30,9 @@ def test_china_stock_reader():
     assert ('stock_sz_002572', '2019-06-10') in df.index
     assert ('stock_sz_000338', '2019-06-10') in df.index
 
-    for timestamp in iterate_timestamps(entity_type='stock', exchange='sz',
-                                        level=IntervalLevel.LEVEL_1DAY,
-                                        start_timestamp='2019-06-11',
-                                        end_timestamp='2019-06-14'):
+    for timestamp in Stock.get_interval_timestamps(start_date='2019-06-11',
+                                                   end_date='2019-06-14',
+                                                   level=IntervalLevel.LEVEL_1DAY):
         data_reader.move_on(to_timestamp=timestamp)
 
         df = data_reader.data_df
