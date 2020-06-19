@@ -3,11 +3,11 @@ from typing import List, Union
 
 import pandas as pd
 
-from zvt.contract import IntervalLevel, Mixin, EntityMixin
+from zvt.contract import IntervalLevel
 from zvt.contract.normal_data import NormalData
 from zvt.contract.reader import DataReader
-from zvt.schemas import SimAccount, Order
 from zvt.drawer.drawer import Drawer
+from zvt.schemas import AccountStats, Order
 
 
 class AccountReader(DataReader):
@@ -25,12 +25,12 @@ class AccountReader(DataReader):
         self.filters = filters
 
         if self.trader_names:
-            filter = [SimAccount.trader_name == name for name in self.trader_names]
+            filter = [AccountStats.trader_name == name for name in self.trader_names]
             if self.filters:
                 self.filters += filter
             else:
                 self.filters = filter
-        super().__init__(SimAccount, None, None, None, None, None, None,
+        super().__init__(AccountStats, None, None, None, None, None, None,
                          the_timestamp, start_timestamp, end_timestamp, columns, filters, order, None, level,
                          'trader_name', 'timestamp', None)
 
@@ -57,7 +57,7 @@ class OrderReader(DataReader):
             else:
                 self.filters = filter
 
-        super().__init__(SimAccount, None, None, None, None, None, the_timestamp,
+        super().__init__(AccountStats, None, None, None, None, None, the_timestamp,
                          start_timestamp, end_timestamp, columns, filters, order, None, 'zvt', level,
                          'trader_name', 'timestamp', None)
 

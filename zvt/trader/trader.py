@@ -5,14 +5,13 @@ from typing import List, Union
 
 import pandas as pd
 
-from zvt.api.business import get_trader
+from zvt.api.business_reader import AccountReader
 from zvt.contract import IntervalLevel, EntityMixin
 from zvt.contract.api import get_db_session
 from zvt.contract.normal_data import NormalData
 from zvt.drawer.drawer import Drawer
 from zvt.factors.target_selector import TargetSelector
-from zvt.reader.business_reader import AccountReader
-from zvt.schemas import business, Stock
+from zvt.schemas import Stock, SimAccount
 from zvt.trader import TradingSignal, TradingSignalType
 from zvt.trader.account import SimAccountService
 from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp, to_time_str
@@ -97,7 +96,7 @@ class Trader(object):
 
     def __init__(self,
                  entity_ids: List[str] = None,
-                 exchanges: List[str] = ['sh', 'sz'],
+                 exchanges: List[str] = None,
                  codes: List[str] = None,
                  start_timestamp: Union[str, pd.Timestamp] = None,
                  end_timestamp: Union[str, pd.Timestamp] = None,
@@ -157,11 +156,18 @@ class Trader(object):
 
         self.init_selectors(entity_ids=entity_ids, entity_schema=self.entity_schema, exchanges=self.exchanges,
                             codes=self.codes, start_timestamp=self.start_timestamp, end_timestamp=self.end_timestamp)
+        if not self.selectors:
+            raise Exception('please setup self.selectors in init_selectors at first')
 
         self.selectors_comparator = self.init_selectors_comparator()
 
         self.trading_level_asc = list(set([IntervalLevel(selector.level) for selector in self.selectors]))
         self.trading_level_asc.sort()
+
+        self.logger.info(f'trader level:{self.level},selectors level:{self.trading_level_asc}')
+
+        if self.level != self.trading_level_asc[0]:
+            raise Exception("trader level should be the min of the selectors")
 
         self.trading_level_desc = list(self.trading_level_asc)
         self.trading_level_desc.reverse()
@@ -169,18 +175,16 @@ class Trader(object):
         self.targets_slot: TargetsSlot = TargetsSlot()
 
         self.session = get_db_session('zvt', 'business')
-        trader = get_trader(session=self.session, trader_name=self.trader_name, return_type='domain', limit=1)
+        sim_account = SimAccount.query_data(filters=[SimAccount.trader_name == self.trader_name], return_type='domain',
+                                            limit=1)
 
-        if trader:
+        if sim_account:
             self.logger.warning("trader:{} has run before,old result would be deleted".format(self.trader_name))
-            self.session.query(business.Trader).filter(business.Trader.trader_name == self.trader_name).delete()
+            self.session.query(SimAccount).filter(SimAccount.trader_name == self.trader_name).delete()
             self.session.commit()
         self.on_start()
 
     def on_start(self):
-        if not self.selectors:
-            raise Exception('please setup self.selectors in init_selectors at first')
-
         # run all the selectors
         for selector in self.selectors:
             # run for the history data at first
@@ -201,14 +205,20 @@ class Trader(object):
         else:
             codes = None
 
-        trader_domain = business.Trader(id=self.trader_name, timestamp=self.start_timestamp,
-                                        trader_name=self.trader_name,
-                                        entity_type=entity_ids, exchanges=exchanges, codes=codes,
-                                        start_timestamp=self.start_timestamp,
-                                        end_timestamp=self.end_timestamp, provider=self.provider,
-                                        level=self.level.value,
-                                        real_time=self.real_time, kdata_use_begin_time=self.kdata_use_begin_time)
-        self.session.add(trader_domain)
+        sim_account = SimAccount(id=self.trader_name,
+                                 entity_id=self.trader_name,
+                                 timestamp=self.start_timestamp,
+                                 trader_name=self.trader_name,
+                                 entity_ids=entity_ids,
+                                 exchanges=exchanges,
+                                 codes=codes,
+                                 start_timestamp=self.start_timestamp,
+                                 end_timestamp=self.end_timestamp,
+                                 provider=self.provider,
+                                 level=self.level.value,
+                                 real_time=self.real_time,
+                                 kdata_use_begin_time=self.kdata_use_begin_time)
+        self.session.add(sim_account)
         self.session.commit()
 
     def init_selectors(self, entity_ids, entity_schema, exchanges, codes, start_timestamp, end_timestamp):

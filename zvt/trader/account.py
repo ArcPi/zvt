@@ -9,7 +9,7 @@ from zvt.api.quote import decode_entity_id, get_kdata_schema
 from zvt.contract import IntervalLevel, EntityMixin
 from zvt.contract.api import get_db_session
 from zvt.schemas import Order
-from zvt.schemas.business import SimAccount, Position
+from zvt.schemas.business import AccountStats, Position
 from zvt.trader import TradingSignalType, TradingListener, TradingSignal
 from zvt.trader.errors import NotEnoughMoneyError, InvalidOrderError, NotEnoughPositionError, InvalidOrderParamError
 from zvt.utils.time_utils import to_pd_timestamp, to_time_str, TIME_FORMAT_ISO8601, is_same_date
@@ -25,7 +25,7 @@ from marshmallow_sqlalchemy import ModelSchema
 
 class SimAccountSchema(ModelSchema):
     class Meta:
-        model = SimAccount
+        model = AccountStats
 
 
 class PositionSchema(ModelSchema):
@@ -147,14 +147,14 @@ class SimAccountService(AccountService):
 
         if account:
             self.logger.warning("trader:{} has run before,old result would be deleted".format(trader_name))
-            self.session.query(SimAccount).filter(SimAccount.trader_name == self.trader_name).delete()
+            self.session.query(AccountStats).filter(AccountStats.trader_name == self.trader_name).delete()
             self.session.query(Position).filter(Position.trader_name == self.trader_name).delete()
             self.session.query(Order).filter(Order.trader_name == self.trader_name).delete()
             self.session.commit()
 
-        account = SimAccount(trader_name=self.trader_name, cash=self.base_capital,
-                             positions=[], all_value=self.base_capital, value=0, closing=False,
-                             timestamp=timestamp)
+        account = AccountStats(trader_name=self.trader_name, cash=self.base_capital,
+                               positions=[], all_value=self.base_capital, value=0, closing=False,
+                               timestamp=timestamp)
         self.latest_account = sim_account_schema.dump(account)
 
         # self.persist_account(timestamp)
@@ -165,7 +165,7 @@ class SimAccountService(AccountService):
             return
         # get the account for trading at the date
         accounts = get_account(session=self.session, trader_name=self.trader_name, return_type='domain',
-                               end_timestamp=to_time_str(timestamp), limit=1, order=SimAccount.timestamp.desc())
+                               end_timestamp=to_time_str(timestamp), limit=1, order=AccountStats.timestamp.desc())
         if accounts:
             account = accounts[0]
         else:
@@ -176,7 +176,7 @@ class SimAccountService(AccountService):
         for position_domain in account.positions:
             position_dict = position_schema.dump(position_domain)
             self.logger.info('current position:{}'.format(position_dict))
-            del position_dict['sim_account']
+            del position_dict['account_stats']
             positions.append(position_dict)
 
         self.latest_account = sim_account_schema.dump(account)
@@ -241,14 +241,14 @@ class SimAccountService(AccountService):
             position_domain.id = '{}_{}_{}'.format(self.trader_name, position['entity_id'],
                                                    to_time_str(timestamp, TIME_FORMAT_ISO8601))
             position_domain.timestamp = to_pd_timestamp(timestamp)
-            position_domain.sim_account_id = the_id
+            position_domain.account_stats_id = the_id
 
             positions.append(position_domain)
 
-        account_domain = SimAccount(id=the_id, trader_name=self.trader_name, cash=self.latest_account['cash'],
-                                    positions=positions,
-                                    all_value=self.latest_account['all_value'], value=self.latest_account['value'],
-                                    timestamp=to_pd_timestamp(self.latest_account['timestamp']))
+        account_domain = AccountStats(id=the_id, trader_name=self.trader_name, cash=self.latest_account['cash'],
+                                      positions=positions,
+                                      all_value=self.latest_account['all_value'], value=self.latest_account['value'],
+                                      timestamp=to_pd_timestamp(self.latest_account['timestamp']))
 
         self.logger.info('persist_account:{}'.format(sim_account_schema.dump(account_domain)))
 
@@ -275,7 +275,7 @@ class SimAccountService(AccountService):
         :param timestamp:
         :type timestamp:
         :return:
-        :rtype:SimAccount
+        :rtype:AccountStats
         """
         return get_account(session=self.session, trader_name=self.trader_name, return_type='domain',
                            end_timestamp=timestamp, limit=1)[0]

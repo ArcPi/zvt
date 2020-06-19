@@ -10,8 +10,9 @@ from zvt.contract.register import register_schema
 BusinessBase = declarative_base()
 
 
-class Trader(BusinessBase, Mixin):
-    __tablename__ = 'trader'
+# 模拟账户
+class SimAccount(BusinessBase, Mixin):
+    __tablename__ = 'sim_account'
     # 机器人名字
     trader_name = Column(String(length=128))
 
@@ -25,22 +26,18 @@ class Trader(BusinessBase, Mixin):
     level = Column(String(length=32))
     real_time = Column(Boolean)
     kdata_use_begin_time = Column(Boolean)
-    # TODO:inspect selector/factors
-    # selectors = Column(String(length=1024))
-    # factors = Column(String(length=1024))
-    # technical_factors = Column(String(length=1024))
 
 
-# 一天只有一条记录
-class SimAccount(BusinessBase, Mixin):
-    __tablename__ = 'sim_account'
+# 当天账户收盘统计
+class AccountStats(BusinessBase, Mixin):
+    __tablename__ = 'account_stats'
 
     # 机器人名字
     trader_name = Column(String(length=128))
     # 可用现金
     cash = Column(Float)
     # 具体仓位
-    positions = relationship("Position", back_populates="sim_account")
+    positions = relationship("Position", back_populates="account_stats")
     # 市值
     value = Column(Float)
     # 市值+cash
@@ -50,20 +47,15 @@ class SimAccount(BusinessBase, Mixin):
     closing = Column(Boolean)
 
 
-# 一天可有多条记录
+# 每天持仓情况，可有多条记录
 class Position(BusinessBase, Mixin):
     __tablename__ = 'position'
 
-    id = Column(String(length=128), primary_key=True)
-    # 时间
-    timestamp = Column(DateTime)
     # 机器人名字
     trader_name = Column(String(length=128))
-    # 证券id
-    entity_id = Column(String(length=128))
     # 账户id
-    sim_account_id = Column(Integer, ForeignKey('sim_account.id'))
-    sim_account = relationship("SimAccount", back_populates="positions")
+    account_stats_id = Column(Integer, ForeignKey('account_stats.id'))
+    account_stats = relationship("AccountStats", back_populates="positions")
 
     # 做多数量
     long_amount = Column(Float)
@@ -86,16 +78,12 @@ class Position(BusinessBase, Mixin):
     trading_t = Column(Integer)
 
 
+# 委托单
 class Order(BusinessBase, Mixin):
     __tablename__ = 'order'
 
-    id = Column(String(length=128), primary_key=True)
-    # 时间
-    timestamp = Column(DateTime)
     # 机器人名字
     trader_name = Column(String(length=128))
-    # 证券id
-    entity_id = Column(String(length=128))
     # 订单价格
     order_price = Column(Float)
     # 订单数量
