@@ -6,12 +6,12 @@ from sqlalchemy.orm import relationship
 from zvt.contract import Mixin
 from zvt.contract.register import register_schema
 
-SimAcountBase = declarative_base()
+TraderBase = declarative_base()
 
 
-# 模拟账户
-class SimAccount(SimAcountBase, Mixin):
-    __tablename__ = 'sim_account'
+# trader信息
+class TraderInfo(TraderBase, Mixin):
+    __tablename__ = 'trader_info'
     # 机器人名字
     trader_name = Column(String(length=128))
 
@@ -28,7 +28,7 @@ class SimAccount(SimAcountBase, Mixin):
 
 
 # 账户每日统治
-class AccountStats(SimAcountBase, Mixin):
+class AccountStats(TraderBase, Mixin):
     __tablename__ = 'account_stats'
 
     # 机器人名字
@@ -47,7 +47,7 @@ class AccountStats(SimAcountBase, Mixin):
 
 
 # 每天持仓情况，可有多条记录
-class Position(SimAcountBase, Mixin):
+class Position(TraderBase, Mixin):
     __tablename__ = 'position'
 
     # 机器人名字
@@ -78,7 +78,7 @@ class Position(SimAcountBase, Mixin):
 
 
 # 委托单
-class Order(SimAcountBase, Mixin):
+class Order(TraderBase, Mixin):
     __tablename__ = 'order'
 
     # 机器人名字
@@ -96,6 +96,6 @@ class Order(SimAcountBase, Mixin):
     level = Column(String(length=32))
 
 
-register_schema(providers=['zvt'], db_name='sim_account', schema_base=SimAcountBase)
+register_schema(providers=['zvt'], db_name='trader_info', schema_base=TraderBase)
 
-__all__ = ['SimAccount', 'AccountStats', 'Position', 'Order']
+__all__ = ['TraderInfo', 'AccountStats', 'Position', 'Order']

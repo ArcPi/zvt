@@ -5,13 +5,13 @@ import pandas as pd
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
+from zvt import zvt_env
 from zvt.contract.api import decode_entity_id
 from zvt.contract.normal_data import NormalData
 from zvt.contract.reader import DataReader
+from zvt.schemas import Stock1dKdata, Stock1dMaStateStats, Stock
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import now_time_str, TIME_FORMAT_ISO8601
-from zvt import zvt_env
-from zvt.schemas import Stock1dKdata, Stock1dMaStateStats, Stock
 
 
 class Drawer(object):
@@ -49,6 +49,7 @@ class Drawer(object):
               height=None,
               title=None,
               keep_ui_state=True,
+              show=False,
               **kwargs):
         if self.sub_data is not None and not self.sub_data.empty():
             subplot = True
@@ -111,7 +112,10 @@ class Drawer(object):
         fig.update_layout(self.gen_plotly_layout(width=width, height=height, title=title, keep_ui_state=keep_ui_state,
                                                  subplot=subplot))
 
-        fig.show()
+        if show:
+            fig.show()
+        else:
+            return fig
 
     def draw_kline(self, width=None, height=None, title=None, keep_ui_state=True, **kwargs):
         return self._draw('kline', width=width, height=height, title=title, keep_ui_state=keep_ui_state, **kwargs)
@@ -181,41 +185,41 @@ class Drawer(object):
                                  zeroline=False)
 
         # if need_range_selector and len(self.main_data.data_df) > 500:
-            # layout.xaxis = dict(
-            #     rangeselector=dict(
-            #         buttons=list([
-            #             dict(count=1,
-            #                  label='1m',
-            #                  step='month',
-            #                  stepmode='backward'),
-            #             dict(count=6,
-            #                  label='6m',
-            #                  step='month',
-            #                  stepmode='backward'),
-            #             dict(count=1,
-            #                  label='YTD',
-            #                  step='year',
-            #                  stepmode='todate'),
-            #             dict(count=1,
-            #                  label='1y',
-            #                  step='year',
-            #                  stepmode='backward'),
-            #             dict(step='all')
-            #         ])
-            #     ),
-            #     rangeslider=dict(
-            #         visible=False,
-            #     ),
-            #     type='date'
-            # )
+        # layout.xaxis = dict(
+        #     rangeselector=dict(
+        #         buttons=list([
+        #             dict(count=1,
+        #                  label='1m',
+        #                  step='month',
+        #                  stepmode='backward'),
+        #             dict(count=6,
+        #                  label='6m',
+        #                  step='month',
+        #                  stepmode='backward'),
+        #             dict(count=1,
+        #                  label='YTD',
+        #                  step='year',
+        #                  stepmode='todate'),
+        #             dict(count=1,
+        #                  label='1y',
+        #                  step='year',
+        #                  stepmode='backward'),
+        #             dict(step='all')
+        #         ])
+        #     ),
+        #     rangeslider=dict(
+        #         visible=False,
+        #     ),
+        #     type='date'
+        # )
 
-            # 没有子图，显示rangeslider
-            # if not subplot:
-            #     layout.xaxis.rangeslider = dict(
-            #         autorange=True,
-            #         visible=True,
-            #         borderwidth=1
-            #     )
+        # 没有子图，显示rangeslider
+        # if not subplot:
+        #     layout.xaxis.rangeslider = dict(
+        #         autorange=True,
+        #         visible=True,
+        #         borderwidth=1
+        #     )
 
         return layout
 

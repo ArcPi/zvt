@@ -10,7 +10,8 @@ from zvt.drawer.drawer import Drawer
 from zvt.schemas import AccountStats, Order
 
 
-class AccountReader(DataReader):
+class AccountStatsReader(DataReader):
+
     def __init__(self,
                  the_timestamp: Union[str, pd.Timestamp] = None,
                  start_timestamp: Union[str, pd.Timestamp] = None,
@@ -32,7 +33,12 @@ class AccountReader(DataReader):
                 self.filters = filter
         super().__init__(AccountStats, None, None, None, None, None, None,
                          the_timestamp, start_timestamp, end_timestamp, columns, filters, order, None, level,
-                         'trader_name', 'timestamp', None)
+                         category_field='trader_name', time_field='timestamp', computing_window=None)
+
+    def draw_line(self, show=True):
+        drawer = Drawer(main_data=NormalData(self.data_df.copy()[['trader_name', 'timestamp', 'all_value']],
+                                             category_field='trader_name'))
+        return drawer.draw_line(show=show)
 
 
 class OrderReader(DataReader):
@@ -57,13 +63,13 @@ class OrderReader(DataReader):
             else:
                 self.filters = filter
 
-        super().__init__(AccountStats, None, None, None, None, None, the_timestamp,
-                         start_timestamp, end_timestamp, columns, filters, order, None, 'zvt', level,
-                         'trader_name', 'timestamp', None)
+        super().__init__(Order, None, None, None, None, None, None,
+                         the_timestamp, start_timestamp, end_timestamp, columns, filters, order, None, level,
+                         category_field='trader_name', time_field='timestamp', computing_window=None)
 
 
 if __name__ == '__main__':
-    reader = AccountReader(trader_names=['000338_ma_trader'])
+    reader = AccountStatsReader(trader_names=['000338_ma_trader'])
     drawer = Drawer(main_data=NormalData(reader.data_df.copy()[['trader_name', 'timestamp', 'all_value']],
                                          category_field='trader_name'))
     drawer.draw_line()

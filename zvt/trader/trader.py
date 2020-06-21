@@ -5,13 +5,13 @@ from typing import List, Union
 
 import pandas as pd
 
-from zvt.api.business_reader import AccountReader
+from zvt.api.business_reader import AccountStatsReader
 from zvt.contract import IntervalLevel, EntityMixin
 from zvt.contract.api import get_db_session
 from zvt.contract.normal_data import NormalData
 from zvt.drawer.drawer import Drawer
 from zvt.factors.target_selector import TargetSelector
-from zvt.schemas import Stock, SimAccount
+from zvt.schemas import Stock, TraderInfo
 from zvt.trader import TradingSignal, TradingSignalType
 from zvt.trader.account import SimAccountService
 from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp, to_time_str
@@ -174,13 +174,13 @@ class Trader(object):
 
         self.targets_slot: TargetsSlot = TargetsSlot()
 
-        self.session = get_db_session('zvt', data_schema=SimAccount)
-        sim_account = SimAccount.query_data(filters=[SimAccount.trader_name == self.trader_name], return_type='domain',
+        self.session = get_db_session('zvt', data_schema=TraderInfo)
+        sim_account = TraderInfo.query_data(filters=[TraderInfo.trader_name == self.trader_name], return_type='domain',
                                             limit=1)
 
         if sim_account:
             self.logger.warning("trader:{} has run before,old result would be deleted".format(self.trader_name))
-            self.session.query(SimAccount).filter(SimAccount.trader_name == self.trader_name).delete()
+            self.session.query(TraderInfo).filter(TraderInfo.trader_name == self.trader_name).delete()
             self.session.commit()
         self.on_start()
 
@@ -205,7 +205,7 @@ class Trader(object):
         else:
             codes = None
 
-        sim_account = SimAccount(id=self.trader_name,
+        sim_account = TraderInfo(id=self.trader_name,
                                  entity_id=self.trader_name,
                                  timestamp=self.start_timestamp,
                                  trader_name=self.trader_name,
@@ -320,7 +320,7 @@ class Trader(object):
         if self.draw_result:
             import plotly.io as pio
             pio.renderers.default = "browser"
-            reader = AccountReader(trader_names=[self.trader_name])
+            reader = AccountStatsReader(trader_names=[self.trader_name])
             df = reader.data_df
             drawer = Drawer(main_data=NormalData(df.copy()[['trader_name', 'timestamp', 'all_value']],
                                                  category_field='trader_name'))

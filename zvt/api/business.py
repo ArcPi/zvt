@@ -2,8 +2,8 @@
 from typing import List
 
 from zvt.contract.api import get_group, get_data
-from zvt.schemas import sim_account
-from zvt.schemas.sim_account import AccountStats, Position, Order
+from zvt.schemas import trader_info
+from zvt.schemas.trader_info import AccountStats, Position, Order
 from zvt.utils.pd_utils import pd_is_not_null
 
 
@@ -14,21 +14,21 @@ def get_traders() -> List[str]:
     return []
 
 
-def get_trader(trader_name=None, return_type='df', start_timestamp=None, end_timestamp=None,
-               filters=None, session=None, order=None, limit=None) -> List[sim_account.SimAccount]:
+def get_trader_info(trader_name=None, return_type='df', start_timestamp=None, end_timestamp=None,
+                    filters=None, session=None, order=None, limit=None) -> List[trader_info.TraderInfo]:
     if trader_name:
         if filters:
-            filters = filters + [sim_account.SimAccount.trader_name == trader_name]
+            filters = filters + [trader_info.TraderInfo.trader_name == trader_name]
         else:
-            filters = [sim_account.SimAccount.trader_name == trader_name]
+            filters = [trader_info.TraderInfo.trader_name == trader_name]
 
-    return get_data(data_schema=sim_account.SimAccount, entity_id=None, codes=None, level=None, provider='zvt',
+    return get_data(data_schema=trader_info.TraderInfo, entity_id=None, codes=None, level=None, provider='zvt',
                     columns=None, return_type=return_type, start_timestamp=start_timestamp,
                     end_timestamp=end_timestamp, filters=filters, session=session, order=order, limit=limit)
 
 
-def get_account(trader_name=None, return_type='df', start_timestamp=None, end_timestamp=None,
-                filters=None, session=None, order=None, limit=None):
+def get_account_stats(trader_name=None, return_type='df', start_timestamp=None, end_timestamp=None,
+                      filters=None, session=None, order=None, limit=None):
     if trader_name:
         if filters:
             filters = filters + [AccountStats.trader_name == trader_name]
@@ -67,4 +67,4 @@ def get_orders(trader_name=None, return_type='df', start_timestamp=None, end_tim
 
 
 if __name__ == '__main__':
-    print(get_trader())
+    print(get_trader_info())

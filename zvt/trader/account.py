@@ -4,11 +4,11 @@ import logging
 import math
 
 from zvt.api import get_kdata
-from zvt.api.business import get_account
+from zvt.api.business import get_account_stats
 from zvt.api.quote import decode_entity_id, get_kdata_schema
 from zvt.contract import IntervalLevel, EntityMixin
 from zvt.contract.api import get_db_session
-from zvt.schemas.sim_account import AccountStats, Position, Order, SimAccount
+from zvt.schemas.trader_info import AccountStats, Position, Order, TraderInfo
 from zvt.trader import TradingSignalType, TradingListener, TradingSignal
 from zvt.trader.errors import NotEnoughMoneyError, InvalidOrderError, NotEnoughPositionError, InvalidOrderParamError, \
     WrongKdataError
@@ -111,12 +111,12 @@ class SimAccountService(AccountService):
         self.slippage = slippage
         self.trader_name = trader_name
 
-        self.session = get_db_session('zvt', data_schema=SimAccount)
+        self.session = get_db_session('zvt', data_schema=TraderInfo)
         self.provider = provider
         self.level = level
         self.start_timestamp = timestamp
 
-        account = get_account(session=self.session, trader_name=self.trader_name, return_type='domain', limit=1)
+        account = get_account_stats(session=self.session, trader_name=self.trader_name, return_type='domain', limit=1)
 
         if account:
             self.logger.warning("trader:{} has run before,old result would be deleted".format(trader_name))
@@ -125,7 +125,8 @@ class SimAccountService(AccountService):
             self.session.query(Order).filter(Order.trader_name == self.trader_name).delete()
             self.session.commit()
 
-        account = AccountStats(trader_name=self.trader_name,
+        account = AccountStats(entity_id=self.trader_name,
+                               trader_name=self.trader_name,
                                cash=self.base_capital,
                                all_value=self.base_capital,
                                value=0,
@@ -140,8 +141,8 @@ class SimAccountService(AccountService):
         if is_same_date(timestamp, self.start_timestamp):
             return
         # get the account for trading at the date
-        accounts = get_account(session=self.session, trader_name=self.trader_name, return_type='domain',
-                               end_timestamp=to_time_str(timestamp), limit=1, order=AccountStats.timestamp.desc())
+        accounts = get_account_stats(session=self.session, trader_name=self.trader_name, return_type='domain',
+                                     end_timestamp=to_time_str(timestamp), limit=1, order=AccountStats.timestamp.desc())
         if accounts:
             account = accounts[0]
         else:
@@ -255,7 +256,10 @@ class SimAccountService(AccountService):
 
             positions.append(position_domain)
 
-        account_domain = AccountStats(id=the_id, trader_name=self.trader_name, cash=self.latest_account['cash'],
+        account_domain = AccountStats(id=the_id,
+                                      entity_id=self.trader_name,
+                                      trader_name=self.trader_name,
+                                      cash=self.latest_account['cash'],
                                       positions=positions,
                                       all_value=self.latest_account['all_value'], value=self.latest_account['value'],
                                       timestamp=to_pd_timestamp(self.latest_account['timestamp']))
@@ -287,8 +291,8 @@ class SimAccountService(AccountService):
         :return:
         :rtype:AccountStats
         """
-        return get_account(session=self.session, trader_name=self.trader_name, return_type='domain',
-                           end_timestamp=timestamp, limit=1)[0]
+        return get_account_stats(session=self.session, trader_name=self.trader_name, return_type='domain',
+                                 end_timestamp=timestamp, limit=1)[0]
 
     def update_position(self, current_position, order_amount, current_price, order_type, timestamp):
         """
