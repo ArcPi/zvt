@@ -243,15 +243,15 @@ class Trader(object):
         if listener in self.trading_signal_listeners:
             self.trading_signal_listeners.remove(listener)
 
-    def handle_targets_slot(self, timestamp):
+    def handle_targets_slot(self, due_timestamp, happen_timestamp):
         """
         this function would be called in every cycle, you could overwrite it for your custom algorithm to select the
         targets of different levels
 
         the default implementation is selecting the targets in all levels
 
-        :param timestamp:
-        :type timestamp:
+        :param due_timestamp:
+        :type due_timestamp:
         """
         long_selected = None
         short_selected = None
@@ -271,13 +271,14 @@ class Trader(object):
                 else:
                     short_selected = short_selected & short_targets
 
-        self.logger.debug('timestamp:{},long_selected:{}'.format(timestamp, long_selected))
+        self.logger.debug('timestamp:{},long_selected:{}'.format(due_timestamp, long_selected))
 
-        self.logger.debug('timestamp:{},short_selected:{}'.format(timestamp, short_selected))
+        self.logger.debug('timestamp:{},short_selected:{}'.format(due_timestamp, short_selected))
 
-        self.send_trading_signals(timestamp=timestamp, long_selected=long_selected, short_selected=short_selected)
+        self.send_trading_signals(due_timestamp=due_timestamp, happen_timestamp=happen_timestamp,
+                                  long_selected=long_selected, short_selected=short_selected)
 
-    def send_trading_signals(self, timestamp, long_selected, short_selected):
+    def send_trading_signals(self, due_timestamp, happen_timestamp, long_selected, short_selected):
         # current position
         account = self.account_service.latest_account
         current_holdings = [position['entity_id'] for position in account['positions'] if
@@ -292,8 +293,9 @@ class Trader(object):
 
                 for entity_id in longed:
                     trading_signal = TradingSignal(entity_id=entity_id,
-                                                   the_timestamp=timestamp,
-                                                   trading_signal_type=TradingSignalType.trading_signal_open_long,
+                                                   due_timestamp=due_timestamp,
+                                                   happen_timestamp=happen_timestamp,
+                                                   trading_signal_type=TradingSignalType.open_long,
                                                    trading_level=self.level,
                                                    order_money=order_money)
                     for listener in self.trading_signal_listeners:
@@ -305,8 +307,9 @@ class Trader(object):
 
             for entity_id in shorted:
                 trading_signal = TradingSignal(entity_id=entity_id,
-                                               the_timestamp=timestamp,
-                                               trading_signal_type=TradingSignalType.trading_signal_close_long,
+                                               due_timestamp=due_timestamp,
+                                               happen_timestamp=happen_timestamp,
+                                               trading_signal_type=TradingSignalType.close_long,
                                                position_pct=1.0,
                                                trading_level=self.level)
                 for listener in self.trading_signal_listeners:
@@ -331,9 +334,9 @@ class Trader(object):
         # timestamp represents the timestamp in kdata
         for timestamp in self.entity_schema.get_interval_timestamps(start_date=self.start_timestamp,
                                                                     end_date=self.end_timestamp, level=self.level):
-
             if not self.in_trading_date(timestamp=timestamp):
                 continue
+
             if self.real_time:
                 # all selector move on to handle the coming data
                 if self.kdata_use_begin_time:
@@ -357,16 +360,20 @@ class Trader(object):
                     self.level != IntervalLevel.LEVEL_1DAY and self.entity_schema.is_open_timestamp(timestamp)):
                 self.account_service.on_trading_open(timestamp)
 
-            # the time always move on by min level step and we could check all level targets in the slot
-            self.handle_targets_slot(timestamp=timestamp)
-
             for level in self.trading_level_asc:
                 # in every cycle, all level selector do its job in its time
                 if self.entity_schema.is_finished_kdata_timestamp(timestamp=timestamp, level=level):
                     long_targets, short_targets = self.selectors_comparator.make_decision(timestamp=timestamp,
                                                                                           trading_level=level)
 
-                    self.targets_slot.input_targets(level, long_targets, short_targets)
+                    if long_targets or short_targets:
+                        self.targets_slot.input_targets(level, long_targets, short_targets)
+                        # the time always move on by min level step and we could check all level targets in the slot
+                        # 1)the targets is generated for next interval
+                        # 2)the acceptable price is next interval prices,you could buy it at current price if the time is before the timestamp(order_timestamp) when trading signal received
+                        # 3)the suggest price the the close price for generating the signal(generated_timestamp)
+                        due_timestamp = timestamp + pd.Timedelta(seconds=self.level.to_second())
+                        self.handle_targets_slot(due_timestamp=due_timestamp, happen_timestamp=timestamp)
 
             # on_trading_close to calculate date account
             if self.level == IntervalLevel.LEVEL_1DAY or (

@@ -8,10 +8,11 @@ from zvt.api.business import get_account
 from zvt.api.quote import decode_entity_id, get_kdata_schema
 from zvt.contract import IntervalLevel, EntityMixin
 from zvt.contract.api import get_db_session
-from zvt.schemas import Order
-from zvt.schemas.business import AccountStats, Position
+from zvt.schemas.business import AccountStats, Position, Order
 from zvt.trader import TradingSignalType, TradingListener, TradingSignal
-from zvt.trader.errors import NotEnoughMoneyError, InvalidOrderError, NotEnoughPositionError, InvalidOrderParamError
+from zvt.trader.errors import NotEnoughMoneyError, InvalidOrderError, NotEnoughPositionError, InvalidOrderParamError, \
+    WrongKdataError
+from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_pd_timestamp, to_time_str, TIME_FORMAT_ISO8601, is_same_date
 from zvt.utils.utils import fill_domain_from_dict
 
@@ -39,9 +40,13 @@ position_schema = PositionSchema()
 
 class AccountService(TradingListener):
     logger = logging.getLogger(__name__)
-    trader_name = None
 
     def get_current_position(self, entity_id):
+        """
+        overwrite it to provide your real position
+
+        :param entity_id:
+        """
         pass
 
     def order(self, entity_id, current_price, current_timestamp, order_amount=0, order_pct=1.0, order_price=0,
@@ -74,49 +79,17 @@ class AccountService(TradingListener):
 
     @staticmethod
     def trading_signal_to_order_type(trading_signal_type):
-        if trading_signal_type == TradingSignalType.trading_signal_open_long:
+        if trading_signal_type == TradingSignalType.open_long:
             return ORDER_TYPE_LONG
-        if trading_signal_type == TradingSignalType.trading_signal_open_short:
+        if trading_signal_type == TradingSignalType.open_short:
             return ORDER_TYPE_SHORT
-        if trading_signal_type == TradingSignalType.trading_signal_close_long:
+        if trading_signal_type == TradingSignalType.close_long:
             return ORDER_TYPE_CLOSE_LONG
-        if trading_signal_type == TradingSignalType.trading_signal_close_short:
+        if trading_signal_type == TradingSignalType.close_short:
             return ORDER_TYPE_CLOSE_SHORT
 
-    def on_trading_signal(self, trading_signal: TradingSignal):
-        self.logger.debug('trader:{} received trading signal:{}'.format(self.trader_name, trading_signal))
-        entity_id = trading_signal.entity_id
-        current_timestamp = trading_signal.the_timestamp
-        order_type = AccountService.trading_signal_to_order_type(trading_signal.trading_signal_type)
-        trading_level = trading_signal.trading_level.value
-        if order_type:
-            try:
-                kdata = get_kdata(provider=self.provider, entity_id=entity_id, level=trading_level,
-                                  start_timestamp=current_timestamp, end_timestamp=current_timestamp,
-                                  limit=1)
-                if kdata is not None and not kdata.empty:
-                    entity_type, _, _ = decode_entity_id(kdata['entity_id'][0])
-
-                    the_price = kdata['close'][0]
-
-                    if the_price:
-                        self.order(entity_id=entity_id, current_price=the_price,
-                                   current_timestamp=current_timestamp, order_pct=trading_signal.position_pct,
-                                   order_money=trading_signal.order_money,
-                                   order_type=order_type)
-                    else:
-                        self.logger.warning(
-                            'ignore trading signal,wrong kdata,entity_id:{},timestamp:{},kdata:{}'.format(entity_id,
-                                                                                                          current_timestamp,
-                                                                                                          kdata.to_dict(
-                                                                                                              orient='records')))
-
-                else:
-                    self.logger.warning(
-                        'ignore trading signal,could not get kdata,entity_id:{},timestamp:{}'.format(entity_id,
-                                                                                                     current_timestamp))
-            except Exception as e:
-                self.logger.exception(e)
+    def get_order_price(self, ):
+        pass
 
 
 class SimAccountService(AccountService):
@@ -125,7 +98,7 @@ class SimAccountService(AccountService):
                  entity_schema: EntityMixin,
                  trader_name,
                  timestamp,
-                 provider='joinquant',
+                 provider=None,
                  level=IntervalLevel.LEVEL_1DAY,
                  base_capital=1000000,
                  buy_cost=0.001,
@@ -182,6 +155,40 @@ class SimAccountService(AccountService):
         self.latest_account = sim_account_schema.dump(account)
         self.latest_account['positions'] = positions
         self.logger.info('on_trading_open:{},latest_account:{}'.format(timestamp, self.latest_account))
+
+    def on_trading_signal(self, trading_signal: TradingSignal):
+        entity_id = trading_signal.entity_id
+        happen_timestamp = trading_signal.happen_timestamp
+        order_type = AccountService.trading_signal_to_order_type(trading_signal.trading_signal_type)
+        trading_level = trading_signal.trading_level.value
+        if order_type:
+            try:
+                kdata = get_kdata(provider=self.provider, entity_id=entity_id, level=trading_level,
+                                  start_timestamp=happen_timestamp, end_timestamp=happen_timestamp,
+                                  limit=1)
+                if pd_is_not_null(kdata):
+                    entity_type, _, _ = decode_entity_id(kdata['entity_id'][0])
+
+                    the_price = kdata['close'][0]
+
+                    if the_price:
+                        self.order(entity_id=entity_id, current_price=the_price,
+                                   current_timestamp=happen_timestamp, order_pct=trading_signal.position_pct,
+                                   order_money=trading_signal.order_money,
+                                   order_type=order_type)
+                    else:
+                        self.logger.warning(
+                            'ignore trading signal,wrong kdata,entity_id:{},timestamp:{},kdata:{}'.format(entity_id,
+                                                                                                          happen_timestamp,
+                                                                                                          kdata.to_dict(
+                                                                                                              orient='records')))
+
+                else:
+                    self.logger.warning(
+                        'ignore trading signal,could not get kdata,entity_id:{},timestamp:{}'.format(entity_id,
+                                                                                                     happen_timestamp))
+            except Exception as e:
+                raise WrongKdataError("could not get kdata")
 
     def on_trading_close(self, timestamp):
         self.logger.info('on_trading_close:{}'.format(timestamp))
@@ -314,7 +321,7 @@ class SimAccountService(AccountService):
         elif order_type == ORDER_TYPE_SHORT:
             need_money = (order_amount * current_price) * (1 + self.slippage + self.buy_cost)
             if self.latest_account['cash'] < need_money:
-                raise NotEnoughMoneyError
+                raise NotEnoughMoneyError()
 
             self.latest_account['cash'] -= need_money
 

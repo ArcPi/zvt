@@ -278,7 +278,7 @@ def get_etf_stocks(code=None, codes=None, ids=None, timestamp=now_pd_timestamp()
                     break
 
 
-def get_kdata(entity_id=None, level=IntervalLevel.LEVEL_1DAY.value, provider='joinquant', columns=None,
+def get_kdata(entity_id=None, level=IntervalLevel.LEVEL_1DAY.value, provider=None, columns=None,
               return_type='df', start_timestamp=None, end_timestamp=None,
               filters=None, session=None, order=None, limit=None, index='timestamp', adjust_type: AdjustType = None):
     entity_type, exchange, code = decode_entity_id(entity_id)
