@@ -5,7 +5,7 @@ import simplejson
 
 from zvt.api.quote import decode_entity_id
 from zvt.api import get_current_price
-from zvt.schemas import business
+from zvt.schemas import sim_account
 from zvt.factors.technical_factor import TechnicalFactor
 from zvt.api.business_reader import OrderReader, AccountReader
 from zvt.utils.pd_utils import pd_is_not_null
@@ -60,7 +60,7 @@ def get_trading_signals_figure(order_reader: OrderReader,
     return go.Figure(data=data, layout=layout)
 
 
-def get_trader_detail_figures(trader_domain: business.SimAccount,
+def get_trader_detail_figures(trader_domain: sim_account.SimAccount,
                               account_reader: AccountReader,
                               order_reader: OrderReader):
     graph_list = []

@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy import Column, String, DateTime, Boolean, ForeignKey, Float, Integer
+from sqlalchemy import Column, String, DateTime, Boolean, Float, Integer, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-# business data
 from zvt.contract import Mixin
 from zvt.contract.register import register_schema
 
-BusinessBase = declarative_base()
+SimAcountBase = declarative_base()
 
 
 # 模拟账户
-class SimAccount(BusinessBase, Mixin):
+class SimAccount(SimAcountBase, Mixin):
     __tablename__ = 'sim_account'
     # 机器人名字
     trader_name = Column(String(length=128))
@@ -28,8 +27,8 @@ class SimAccount(BusinessBase, Mixin):
     kdata_use_begin_time = Column(Boolean)
 
 
-# 当天账户收盘统计
-class AccountStats(BusinessBase, Mixin):
+# 账户每日统治
+class AccountStats(SimAcountBase, Mixin):
     __tablename__ = 'account_stats'
 
     # 机器人名字
@@ -48,7 +47,7 @@ class AccountStats(BusinessBase, Mixin):
 
 
 # 每天持仓情况，可有多条记录
-class Position(BusinessBase, Mixin):
+class Position(SimAcountBase, Mixin):
     __tablename__ = 'position'
 
     # 机器人名字
@@ -79,7 +78,7 @@ class Position(BusinessBase, Mixin):
 
 
 # 委托单
-class Order(BusinessBase, Mixin):
+class Order(SimAcountBase, Mixin):
     __tablename__ = 'order'
 
     # 机器人名字
@@ -97,4 +96,6 @@ class Order(BusinessBase, Mixin):
     level = Column(String(length=32))
 
 
-register_schema(providers=['zvt'], db_name='business', schema_base=BusinessBase)
+register_schema(providers=['zvt'], db_name='sim_account', schema_base=SimAcountBase)
+
+__all__ = ['SimAccount', 'AccountStats', 'Position', 'Order']

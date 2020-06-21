@@ -2,8 +2,8 @@
 from typing import List
 
 from zvt.contract.api import get_group, get_data
-from zvt.schemas import business
-from zvt.schemas.business import AccountStats, Position, Order
+from zvt.schemas import sim_account
+from zvt.schemas.sim_account import AccountStats, Position, Order
 from zvt.utils.pd_utils import pd_is_not_null
 
 
@@ -15,14 +15,14 @@ def get_traders() -> List[str]:
 
 
 def get_trader(trader_name=None, return_type='df', start_timestamp=None, end_timestamp=None,
-               filters=None, session=None, order=None, limit=None) -> List[business.SimAccount]:
+               filters=None, session=None, order=None, limit=None) -> List[sim_account.SimAccount]:
     if trader_name:
         if filters:
-            filters = filters + [business.SimAccount.trader_name == trader_name]
+            filters = filters + [sim_account.SimAccount.trader_name == trader_name]
         else:
-            filters = [business.SimAccount.trader_name == trader_name]
+            filters = [sim_account.SimAccount.trader_name == trader_name]
 
-    return get_data(data_schema=business.SimAccount, entity_id=None, codes=None, level=None, provider='zvt',
+    return get_data(data_schema=sim_account.SimAccount, entity_id=None, codes=None, level=None, provider='zvt',
                     columns=None, return_type=return_type, start_timestamp=start_timestamp,
                     end_timestamp=end_timestamp, filters=filters, session=session, order=order, limit=limit)
 

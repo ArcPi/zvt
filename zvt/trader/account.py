@@ -8,7 +8,7 @@ from zvt.api.business import get_account
 from zvt.api.quote import decode_entity_id, get_kdata_schema
 from zvt.contract import IntervalLevel, EntityMixin
 from zvt.contract.api import get_db_session
-from zvt.schemas.business import AccountStats, Position, Order
+from zvt.schemas.sim_account import AccountStats, Position, Order, SimAccount
 from zvt.trader import TradingSignalType, TradingListener, TradingSignal
 from zvt.trader.errors import NotEnoughMoneyError, InvalidOrderError, NotEnoughPositionError, InvalidOrderParamError, \
     WrongKdataError
@@ -21,20 +21,23 @@ ORDER_TYPE_SHORT = 'order_short'
 ORDER_TYPE_CLOSE_LONG = 'order_close_long'
 ORDER_TYPE_CLOSE_SHORT = 'order_close_short'
 
-from marshmallow_sqlalchemy import ModelSchema
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 
 
-class SimAccountSchema(ModelSchema):
+# FIXME:better way for schema<->domain,now just dump to schema and use dict['field'] for operation
+class AccountDayStatsSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = AccountStats
+        include_relationships = True
 
 
-class PositionSchema(ModelSchema):
+class PositionSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = Position
+        include_relationships = True
 
 
-sim_account_schema = SimAccountSchema()
+account_stats_schema = AccountDayStatsSchema()
 position_schema = PositionSchema()
 
 
@@ -88,9 +91,6 @@ class AccountService(TradingListener):
         if trading_signal_type == TradingSignalType.close_short:
             return ORDER_TYPE_CLOSE_SHORT
 
-    def get_order_price(self, ):
-        pass
-
 
 class SimAccountService(AccountService):
 
@@ -111,7 +111,7 @@ class SimAccountService(AccountService):
         self.slippage = slippage
         self.trader_name = trader_name
 
-        self.session = get_db_session('zvt', 'business')
+        self.session = get_db_session('zvt', data_schema=SimAccount)
         self.provider = provider
         self.level = level
         self.start_timestamp = timestamp
@@ -125,10 +125,13 @@ class SimAccountService(AccountService):
             self.session.query(Order).filter(Order.trader_name == self.trader_name).delete()
             self.session.commit()
 
-        account = AccountStats(trader_name=self.trader_name, cash=self.base_capital,
-                               positions=[], all_value=self.base_capital, value=0, closing=False,
+        account = AccountStats(trader_name=self.trader_name,
+                               cash=self.base_capital,
+                               all_value=self.base_capital,
+                               value=0,
+                               closing=False,
                                timestamp=timestamp)
-        self.latest_account = sim_account_schema.dump(account)
+        self.latest_account = account_stats_schema.dump(account)
 
         # self.persist_account(timestamp)
 
@@ -152,7 +155,7 @@ class SimAccountService(AccountService):
             del position_dict['account_stats']
             positions.append(position_dict)
 
-        self.latest_account = sim_account_schema.dump(account)
+        self.latest_account = account_stats_schema.dump(account)
         self.latest_account['positions'] = positions
         self.logger.info('on_trading_open:{},latest_account:{}'.format(timestamp, self.latest_account))
 
@@ -199,7 +202,7 @@ class SimAccountService(AccountService):
             entity_type, _, _ = decode_entity_id(position['entity_id'])
             data_schema = get_kdata_schema(entity_type, level=self.level)
 
-            kdata = get_kdata(provider=self.provider, level=self.level, entity_id=position['entity_id'],
+            kdata = get_kdata(provider=self.provider, level=IntervalLevel.LEVEL_1DAY, entity_id=position['entity_id'],
                               order=data_schema.timestamp.desc(),
                               end_timestamp=timestamp, limit=1)
 
@@ -257,14 +260,14 @@ class SimAccountService(AccountService):
                                       all_value=self.latest_account['all_value'], value=self.latest_account['value'],
                                       timestamp=to_pd_timestamp(self.latest_account['timestamp']))
 
-        self.logger.info('persist_account:{}'.format(sim_account_schema.dump(account_domain)))
+        self.logger.info('persist_account:{}'.format(account_stats_schema.dump(account_domain)))
 
         self.session.add(account_domain)
         self.session.commit()
 
     def get_current_position(self, entity_id):
         """
-        get current position to design whether order could make
+        get current position to decide whether order could make
 
         :param entity_id:
         :type entity_id: str

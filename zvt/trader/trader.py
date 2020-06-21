@@ -174,7 +174,7 @@ class Trader(object):
 
         self.targets_slot: TargetsSlot = TargetsSlot()
 
-        self.session = get_db_session('zvt', 'business')
+        self.session = get_db_session('zvt', data_schema=SimAccount)
         sim_account = SimAccount.query_data(filters=[SimAccount.trader_name == self.trader_name], return_type='domain',
                                             limit=1)
 

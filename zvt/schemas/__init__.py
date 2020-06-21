@@ -49,7 +49,7 @@ class CompanyType(enum.Enum):
 
 
 # make sure import all the domain schemas before using them
-from zvt.schemas.business import *
+from zvt.schemas.sim_account import *
 from zvt.schemas.meta import *
 from zvt.schemas.fundamental import *
 from zvt.schemas.misc import *
