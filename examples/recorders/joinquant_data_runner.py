@@ -22,6 +22,7 @@ def record_kdata():
             Stock.record_data(provider='joinquant', sleeping_time=1)
             StockTradeDay.record_data(provider='joinquant', sleeping_time=1)
             Stock1dKdata.record_data(provider='joinquant', sleeping_time=1)
+            Stock1dHfqKdata.record_data(provider='joinquant', sleeping_time=1)
             StockValuation.record_data(provider='joinquant', sleeping_time=1)
 
             email_action.send_message("5533061@qq.com", 'joinquant record kdata finished', '')
