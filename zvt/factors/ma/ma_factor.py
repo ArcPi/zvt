@@ -11,7 +11,7 @@ from zvt.factors import Accumulator
 from zvt.factors.algorithm import MaTransformer, MaAndVolumeTransformer
 from zvt.factors.factor import Transformer
 from zvt.factors.technical_factor import TechnicalFactor
-from zvt.schemas import Stock
+from zvt.domain import Stock
 from zvt.utils.time_utils import now_pd_timestamp
 
 

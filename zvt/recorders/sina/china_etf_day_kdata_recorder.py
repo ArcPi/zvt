@@ -10,7 +10,7 @@ from zvt.utils.time_utils import to_time_str
 from zvt import init_log
 from zvt.api.quote import generate_kdata_id
 from zvt.api import get_kdata
-from zvt.schemas import Index, Etf1dKdata
+from zvt.domain import Index, Etf1dKdata
 from zvt.recorders.consts import EASTMONEY_ETF_NET_VALUE_HEADER
 
 

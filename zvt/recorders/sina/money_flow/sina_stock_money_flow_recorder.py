@@ -7,7 +7,7 @@ from zvt.contract import IntervalLevel
 from zvt.contract.recorder import FixedCycleDataRecorder
 from zvt.utils.time_utils import to_pd_timestamp, is_same_date, now_pd_timestamp
 from zvt.utils.utils import to_float
-from zvt.schemas import StockMoneyFlow, Stock, StockTradeDay
+from zvt.domain import StockMoneyFlow, Stock, StockTradeDay
 
 
 class SinaStockMoneyFlowRecorder(FixedCycleDataRecorder):

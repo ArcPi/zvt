@@ -6,7 +6,7 @@ from zvt.contract.recorder import TimeSeriesDataRecorder
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import now_pd_timestamp
 from zvt.api.quote import get_etf_stocks
-from zvt.schemas import StockValuation, Etf, EtfValuation
+from zvt.domain import StockValuation, Etf, EtfValuation
 
 
 class JqChinaEtfValuationRecorder(TimeSeriesDataRecorder):

@@ -2,7 +2,7 @@ from ..context import init_test_context
 
 init_test_context()
 
-from zvt.schemas import FinanceFactor, BalanceSheet, IncomeStatement, CashFlowStatement
+from zvt.domain import FinanceFactor, BalanceSheet, IncomeStatement, CashFlowStatement
 from zvt.contract.api import get_db_session
 from zvt.utils.time_utils import to_time_str
 

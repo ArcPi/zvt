@@ -9,7 +9,7 @@ from zvt.contract.recorder import FixedCycleDataRecorder
 from zvt.utils.time_utils import to_pd_timestamp, now_time_str, TIME_FORMAT_DAY1
 from zvt.utils.utils import json_callback_param, to_float
 from zvt.api.quote import generate_kdata_id, get_kdata_schema
-from zvt.schemas import Index, BlockCategory, Block
+from zvt.domain import Index, BlockCategory, Block
 
 
 def level_flag(level: IntervalLevel):

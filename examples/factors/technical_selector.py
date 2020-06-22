@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from zvt.contract import IntervalLevel
-from zvt.schemas import Stock
+from zvt.domain import Stock
 from zvt.factors.target_selector import TargetSelector
 from zvt.factors.technical_factor import BullFactor
 from zvt.settings import SAMPLE_STOCK_CODES

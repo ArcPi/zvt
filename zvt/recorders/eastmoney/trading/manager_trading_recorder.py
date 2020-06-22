@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from zvt.utils.utils import to_float
-from zvt.schemas import ManagerTrading
+from zvt.domain import ManagerTrading
 
 from zvt.recorders.eastmoney.common import EastmoneyMoreDataRecorder
 

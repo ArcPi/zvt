@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from zvt.schemas import RightsIssueDetail, DividendFinancing
+from zvt.domain import RightsIssueDetail, DividendFinancing
 from zvt.recorders.eastmoney.common import EastmoneyPageabeDataRecorder
 from zvt.settings import SAMPLE_STOCK_CODES
 from zvt.utils.pd_utils import pd_is_not_null

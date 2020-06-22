@@ -275,7 +275,7 @@ class DataReader(object):
 __all__ = ['DataListener', 'DataReader']
 
 if __name__ == '__main__':
-    from zvt.schemas import Stock1dKdata, Stock
+    from zvt.domain import Stock1dKdata, Stock
 
     data_reader = DataReader(codes=['002572', '000338'], data_schema=Stock1dKdata, entity_schema=Stock,
                              start_timestamp='2017-01-01',

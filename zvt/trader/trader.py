@@ -11,7 +11,7 @@ from zvt.contract.api import get_db_session
 from zvt.contract.normal_data import NormalData
 from zvt.drawer.drawer import Drawer
 from zvt.factors.target_selector import TargetSelector
-from zvt.schemas import Stock, TraderInfo
+from zvt.domain import Stock, TraderInfo
 from zvt.trader import TradingSignal, TradingSignalType
 from zvt.trader.account import SimAccountService
 from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp, to_time_str

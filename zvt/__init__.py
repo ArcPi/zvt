@@ -109,7 +109,7 @@ if os.getenv('TESTING_ZVT'):
 else:
     init_env(zvt_home=ZVT_HOME)
 
-import zvt.schemas as schemas
+import zvt.domain as domain
 import zvt.recorders as recorders
 
 import pluggy
@@ -117,4 +117,4 @@ import pluggy
 hookimpl = pluggy.HookimplMarker("zvt")
 """Marker to be imported and used in plugins (and for own implementations)"""
 
-__all__ = ['schemas', 'recorders', 'zvt_env', 'init_log', 'init_env']
+__all__ = ['domain', 'recorders', 'zvt_env', 'init_log', 'init_env']

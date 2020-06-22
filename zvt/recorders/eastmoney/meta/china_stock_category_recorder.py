@@ -7,7 +7,7 @@ from zvt.contract.recorder import Recorder, TimeSeriesDataRecorder
 from zvt.utils.time_utils import now_pd_timestamp
 from zvt.utils.utils import json_callback_param
 from zvt.api.quote import china_stock_code_to_id
-from zvt.schemas import BlockStock, BlockCategory, Block
+from zvt.domain import BlockStock, BlockCategory, Block
 
 
 class EastmoneyChinaBlockRecorder(Recorder):

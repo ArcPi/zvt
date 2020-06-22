@@ -3,7 +3,7 @@ import time
 
 import pandas as pd
 
-from zvt.schemas import *
+from zvt.domain import *
 from zvt.reader import *
 
 r = DataReader(data_schema=CoinTickKdata, provider='ccxt', level='tick')

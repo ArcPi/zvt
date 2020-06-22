@@ -7,7 +7,7 @@ from sqlalchemy import or_
 
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import to_pd_timestamp, now_time_str
-from zvt.schemas import FinanceFactor, BalanceSheet, IncomeStatement
+from zvt.domain import FinanceFactor, BalanceSheet, IncomeStatement
 
 
 def get_subscriber_emails():

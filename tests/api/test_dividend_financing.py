@@ -2,7 +2,7 @@ from ..context import init_test_context
 
 init_test_context()
 
-from zvt.schemas import SpoDetail, RightsIssueDetail, DividendFinancing
+from zvt.domain import SpoDetail, RightsIssueDetail, DividendFinancing
 from zvt.contract.api import get_db_session
 from zvt.utils.time_utils import to_pd_timestamp
 

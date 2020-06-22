@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from zvt.contract import IntervalLevel
-from zvt.schemas import ReportPeriod
+from zvt.domain import ReportPeriod
 
 
 def to_jq_trading_level(trading_level: IntervalLevel):

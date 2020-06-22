@@ -10,7 +10,7 @@ from examples.reports import get_subscriber_emails
 from zvt.contract.api import get_entities
 from zvt.utils.time_utils import now_pd_timestamp, to_time_str
 from zvt import init_log
-from zvt.schemas import Stock
+from zvt.domain import Stock
 from zvt.factors.target_selector import TargetSelector
 from zvt.informer.informer import EmailInformer
 

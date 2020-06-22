@@ -8,8 +8,8 @@ from dash.dependencies import Input, Output
 from zvt.api.business import get_trader_info
 from zvt.api.business_reader import AccountStatsReader, OrderReader
 from zvt.apps import app
+from zvt.domain import TraderInfo
 from zvt.drawer.dcc_components import get_account_stats_figure
-from zvt.schemas import TraderInfo
 
 account_readers = []
 order_readers = []

@@ -6,7 +6,7 @@ from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimeSeriesDataRecorder
 from zvt.utils.time_utils import to_time_str
 from zvt import zvt_env
-from zvt.schemas import StockTradeDay, Stock
+from zvt.domain import StockTradeDay, Stock
 
 
 class StockTradeDayRecorder(TimeSeriesDataRecorder):

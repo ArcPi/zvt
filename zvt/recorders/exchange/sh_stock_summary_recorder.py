@@ -5,8 +5,8 @@ import requests
 from zvt.contract.recorder import TimestampsDataRecorder
 from zvt.utils.time_utils import to_time_str
 from zvt.utils.utils import to_float
-from zvt.schemas import Index
-from zvt.schemas.misc import StockSummary
+from zvt.domain import Index
+from zvt.domain.misc import StockSummary
 from zvt.recorders.consts import DEFAULT_SH_SUMMARY_HEADER
 
 

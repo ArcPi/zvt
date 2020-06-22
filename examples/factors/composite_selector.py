@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from examples.factors.technical_selector import TechnicalSelector
 from zvt.contract import IntervalLevel
-from zvt.schemas import Block
+from zvt.domain import Block
 from zvt.factors.money_flow_factor import BlockMoneyFlowFactor
 from zvt.factors.target_selector import TargetSelector
 from zvt.settings import SAMPLE_STOCK_CODES

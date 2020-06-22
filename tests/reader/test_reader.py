@@ -5,7 +5,7 @@ init_test_context()
 
 import time
 
-from zvt.schemas import Stock1dKdata, Stock
+from zvt.domain import Stock1dKdata, Stock
 
 from zvt.utils.time_utils import to_time_str
 

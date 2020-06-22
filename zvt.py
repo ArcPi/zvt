@@ -4,7 +4,7 @@ import pluggy
 
 from zvt import impls, zvt_env, specs
 from zvt.contract import zvt_context
-from zvt.schemas import Stock1dHfqKdata
+from zvt.domain import Stock1dHfqKdata
 
 
 def main():

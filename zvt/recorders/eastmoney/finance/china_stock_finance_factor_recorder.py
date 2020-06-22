@@ -2,7 +2,7 @@
 from zvt.utils.time_utils import to_pd_timestamp
 from zvt.utils.utils import add_func_to_value, to_float
 from zvt.api.quote import to_report_period_type
-from zvt.schemas import FinanceFactor
+from zvt.domain import FinanceFactor
 from zvt.recorders.eastmoney.finance.base_china_stock_finance_recorder import BaseChinaStockFinanceRecorder
 
 finance_factor_map = {

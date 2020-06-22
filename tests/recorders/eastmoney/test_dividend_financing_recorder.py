@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from zvt.schemas import DividendDetail, RightsIssueDetail, SpoDetail, DividendFinancing
+from zvt.domain import DividendDetail, RightsIssueDetail, SpoDetail, DividendFinancing
 from ...context import init_test_context
 
 init_test_context()

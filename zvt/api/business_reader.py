@@ -7,7 +7,7 @@ from zvt.contract import IntervalLevel
 from zvt.contract.normal_data import NormalData
 from zvt.contract.reader import DataReader
 from zvt.drawer.drawer import Drawer
-from zvt.schemas import AccountStats, Order
+from zvt.domain import AccountStats, Order
 
 
 class AccountStatsReader(DataReader):

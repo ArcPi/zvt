@@ -2,8 +2,8 @@
 from typing import List
 
 from zvt.contract.api import get_group, get_data
-from zvt.schemas import trader_info
-from zvt.schemas.trader_info import AccountStats, Position, Order
+from zvt.domain import trader_info
+from zvt.domain.trader_info import AccountStats, Position, Order
 from zvt.utils.pd_utils import pd_is_not_null
 
 

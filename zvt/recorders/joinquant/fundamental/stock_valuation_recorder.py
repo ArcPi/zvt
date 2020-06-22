@@ -7,7 +7,7 @@ from zvt.contract.api import df_to_db
 from zvt.contract.recorder import TimeSeriesDataRecorder
 from zvt.utils.time_utils import now_pd_timestamp, now_time_str, to_time_str
 from zvt import zvt_env
-from zvt.schemas import Stock, StockValuation, Etf
+from zvt.domain import Stock, StockValuation, Etf
 from zvt.recorders.joinquant.common import to_jq_entity_id
 
 

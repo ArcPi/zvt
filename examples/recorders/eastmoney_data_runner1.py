@@ -5,7 +5,7 @@ import time
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from zvt import init_log
-from zvt.schemas import *
+from zvt.domain import *
 from zvt.informer.informer import EmailInformer
 
 logger = logging.getLogger(__name__)

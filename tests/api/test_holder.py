@@ -5,7 +5,7 @@ init_test_context()
 
 from typing import List
 
-from zvt.schemas import TopTenHolder, TopTenTradableHolder
+from zvt.domain import TopTenHolder, TopTenTradableHolder
 
 session = get_db_session(provider='eastmoney', db_name='holder')  # type: sqlalchemy.orm.Session
 

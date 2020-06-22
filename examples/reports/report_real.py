@@ -10,7 +10,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from examples.factors.block_selector import BlockSelector
 from zvt.contract.api import get_entities
 from zvt import init_log
-from zvt.schemas import Stock1dKdata, BlockStock, Block, StockValuation, Stock
+from zvt.domain import Stock1dKdata, BlockStock, Block, StockValuation, Stock
 from zvt.factors import TargetSelector
 from zvt.factors.ma.ma_factor import VolumeUpMa250Factor
 from zvt.informer.informer import EmailInformer

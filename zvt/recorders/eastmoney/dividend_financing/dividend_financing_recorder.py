@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from zvt.schemas.fundamental.dividend_financing import DividendFinancing
+from zvt.domain.fundamental.dividend_financing import DividendFinancing
 from zvt.recorders.eastmoney.common import EastmoneyPageabeDataRecorder
 from zvt.utils.utils import second_item_to_float
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from zvt.utils.time_utils import to_pd_timestamp
-from zvt.schemas import DividendDetail
+from zvt.domain import DividendDetail
 from zvt.recorders.eastmoney.common import EastmoneyPageabeDataRecorder
 
 

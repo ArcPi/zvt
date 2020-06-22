@@ -4,7 +4,7 @@ import logging
 from zvt.contract import IntervalLevel
 from zvt.contract.api import get_entities
 from zvt.utils.time_utils import now_pd_timestamp
-from zvt.schemas import Stock
+from zvt.domain import Stock
 from zvt.factors.ma.ma_factor import MaFactor
 from zvt.factors.ma.ma_stats import MaStateStatsFactor
 

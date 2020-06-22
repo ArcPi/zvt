@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from zvt.schemas import SpoDetail, DividendFinancing
+from zvt.domain import SpoDetail, DividendFinancing
 from zvt.recorders.eastmoney.common import EastmoneyPageabeDataRecorder
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import now_pd_timestamp

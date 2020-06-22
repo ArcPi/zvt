@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from zvt.schemas import TopTenTradableHolder
+from zvt.domain import TopTenTradableHolder
 from zvt.recorders.eastmoney.holder.top_ten_holder_recorder import TopTenHolderRecorder
 
 

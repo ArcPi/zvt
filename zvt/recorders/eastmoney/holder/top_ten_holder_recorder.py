@@ -2,7 +2,7 @@
 from zvt.utils.time_utils import to_time_str, to_pd_timestamp
 from zvt.utils.utils import to_float
 from zvt.api.quote import to_report_period_type
-from zvt.schemas.misc.holder import TopTenHolder
+from zvt.domain.misc.holder import TopTenHolder
 from zvt.recorders.eastmoney.common import EastmoneyTimestampsDataRecorder, get_fc
 
 

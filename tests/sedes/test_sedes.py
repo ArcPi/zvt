@@ -3,7 +3,7 @@ import json
 from sqlalchemy.sql.elements import BinaryExpression
 
 from zvt.sedes import CustomJsonEncoder, CustomJsonDecoder
-from zvt.schemas import Stock1dKdata
+from zvt.domain import Stock1dKdata
 
 
 def test_json_codec():

@@ -9,7 +9,7 @@ from zvt import zvt_env
 from zvt.contract.api import decode_entity_id
 from zvt.contract.normal_data import NormalData
 from zvt.contract.reader import DataReader
-from zvt.schemas import Stock1dKdata, Stock1dMaStateStats, Stock
+from zvt.domain import Stock1dKdata, Stock1dMaStateStats, Stock
 from zvt.utils.pd_utils import pd_is_not_null
 from zvt.utils.time_utils import now_time_str, TIME_FORMAT_ISO8601
 

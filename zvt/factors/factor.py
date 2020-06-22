@@ -11,7 +11,7 @@ from zvt.contract.api import get_data, df_to_db
 from zvt.contract.normal_data import NormalData
 from zvt.contract.reader import DataReader, DataListener
 from zvt.drawer.drawer import Drawer
-from zvt.schemas import Stock
+from zvt.domain import Stock
 from zvt.utils.pd_utils import pd_is_not_null
 
 

@@ -5,7 +5,7 @@ import pandas as pd
 
 from zvt.contract import IntervalLevel, EntityMixin
 from zvt.contract.reader import DataReader
-from zvt.schemas import Stock, Stock1dKdata
+from zvt.domain import Stock, Stock1dKdata
 from zvt.drawer.drawer import Drawer
 from zvt.factors import Accumulator
 from zvt.factors.factor import Transformer

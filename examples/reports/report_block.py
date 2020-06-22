@@ -7,7 +7,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from zvt.contract import IntervalLevel
 from zvt import init_log
-from zvt.schemas import Block, BlockMoneyFlow, BlockCategory
+from zvt.domain import Block, BlockMoneyFlow, BlockCategory
 from zvt.factors import TargetSelector
 from zvt.factors.money_flow_factor import BlockMoneyFlowFactor
 from zvt.informer.informer import EmailInformer
