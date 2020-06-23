@@ -5,9 +5,9 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-from zvt.api.business import get_trader_info
+from zvt.api.business import get_trader_info, get_order_securities
 from zvt.api.business_reader import AccountStatsReader, OrderReader
-from zvt.apps import app
+from zvt.app import app
 from zvt.domain import TraderInfo
 from zvt.drawer.dcc_components import get_account_stats_figure
 
@@ -37,24 +37,67 @@ load_traders()
 
 def serve_layout():
     layout = html.Div(
-        [
+        children=[
+            # Top Banner
             html.Div(
-                [
-                    dcc.Dropdown(
-                        id='trader-selector',
-                        placeholder='select the trader',
-                        options=[{'label': item, 'value': i} for i, item in enumerate(trader_names)])
-                ]),
+                className="zvt-banner row",
+                children=[
+                    html.H2(className="h2-title", children="ZVT"),
+                    html.H2(className="h2-title-mobile", children="ZVT"),
+                ],
+            ),
+            # trader body
+            html.Div(
+                className="row app-body",
+                children=[
+                    dcc.Interval(
+                        id='interval-component',
+                        interval=5 * 1000,  # in milliseconds
+                        n_intervals=0
+                    ),
+                    # controls
+                    html.Div(
+                        className="four columns card",
+                        children=[
+                            html.Div(
+                                className="bg-white user-control",
+                                children=[
+                                    html.Div(
+                                        className="padding-top-bot",
+                                        children=[
+                                            html.H6("select trader:"),
+                                            dcc.Dropdown(id='trader-selector',
+                                                         placeholder='select the trader',
+                                                         options=[{'label': item, 'value': i} for i, item in
+                                                                  enumerate(trader_names)]
+                                                         ),
+                                        ],
+                                    ),
+                                    html.Div(
+                                        className="padding-top-bot",
+                                        children=[
+                                            html.H6("select target:"),
+                                            dcc.Dropdown(id='target-selector',
+                                                         placeholder='select the target'
+                                                         ),
+                                        ],
+                                    ),
+                                ],
+                            )
+                        ],
+                    ),
 
-            html.Div(id='trader-details', style={'width': '80%', 'margin': 'auto'}),
-
-            dcc.Interval(
-                id='interval-component',
-                interval=5 * 1000,  # in milliseconds
-                n_intervals=0
-            )
-
-        ])
+                    # Graph
+                    html.Div(
+                        className="eight columns card-left",
+                        children=[
+                            html.Div(
+                                id='trader-details',
+                                className="bg-white",
+                            )
+                        ],
+                    )
+                ])])
 
     load_traders()
 
@@ -62,11 +105,14 @@ def serve_layout():
 
 
 @app.callback(
-    Output('trader-details', 'children'),
+    [Output('trader-details', 'children'),
+     Output('target-selector', 'options')],
     [Input('interval-component', 'n_intervals'),
      Input('trader-selector', 'value')])
 def update_trader_details(n, i):
     if i is None or n < 1:
-        return ''
+        return '', []
 
-    return get_account_stats_figure(account_stats_reader=account_readers[i])
+    return get_account_stats_figure(account_stats_reader=account_readers[i]), \
+           [{'label': security_id, 'value': security_id} for security_id in
+            get_order_securities(trader_name=trader_names[i])]

@@ -3,6 +3,7 @@
 import dash_core_components as dcc
 import plotly.graph_objs as go
 
+from zvt.api.business import get_orders
 from zvt.api.business_reader import OrderReader, AccountStatsReader
 from zvt.api.quote import decode_entity_id
 from zvt.factors.technical_factor import TechnicalFactor
@@ -67,3 +68,6 @@ def get_account_stats_figure(account_stats_reader: AccountStatsReader):
                 figure=fig))
 
     return graph_list
+
+def get_trading_entities(trader_name:str):
+    order:Order=get_orders(trader_name=trader_name,return_type='domain')

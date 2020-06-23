@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from typing import List
 
-from zvt.contract.api import get_group, get_data
+from zvt.contract.api import get_group, get_data, get_db_session
 from zvt.domain import trader_info
 from zvt.domain.trader_info import AccountStats, Position, Order
 from zvt.utils.pd_utils import pd_is_not_null
@@ -66,5 +66,12 @@ def get_orders(trader_name=None, return_type='df', start_timestamp=None, end_tim
                     end_timestamp=end_timestamp, filters=filters, session=session, order=order, limit=limit)
 
 
+def get_order_securities(trader_name):
+    items = get_db_session(provider='zvt', data_schema=Order).query(Order.entity_id).filter(
+        Order.trader_name == trader_name).group_by(Order.entity_id).all()
+
+    return [item[0] for item in items]
+
+
 if __name__ == '__main__':
-    print(get_trader_info())
+    print(get_order_securities(trader_name='000338_ma_trader'))

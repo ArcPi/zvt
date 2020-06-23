@@ -1,4 +1,4 @@
-from zvt.apps import app
+from zvt.app import app
 from zvt.apps.trader_app import serve_layout
 
 app.layout = serve_layout
